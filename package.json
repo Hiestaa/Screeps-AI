@@ -1,0 +1,38 @@
+{
+  "name": "screeps-ai",
+  "version": "0.0.1",
+  "description": "An AI for the game screep (or at least, my code wandering in the attempt of getting something to work)",
+  "main": "build/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hiestaa/Screeps-AI.git"
+  },
+  "keywords": [
+    "screeps",
+    "ai",
+    "automation"
+  ],
+  "author": "Romain G",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hiestaa/Screeps-AI/issues"
+  },
+  "homepage": "https://github.com/Hiestaa/Screeps-AI#readme",
+  "devDependencies": {
+    "grunt": "^1.0.2",
+    "grunt-contrib-clean": "^1.1.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-eslint": "^20.1.0",
+    "grunt-file-append": "0.0.7",
+    "grunt-jsbeautifier": "^0.2.13",
+    "grunt-rsync": "^2.0.1",
+    "grunt-screeps": "^1.4.0",
+    "load-grunt-tasks": "^3.5.2",
+    "time-grunt": "^1.4.0"
+  },
+  "dependencies": {}
+}

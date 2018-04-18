@@ -1,4 +1,5 @@
 const selectSource = require('utils.sourceSelection');
+const harvester = require('roles.harvester');
 
 /*
  * Describes the harvester (level 0) behavior.
@@ -33,6 +34,10 @@ module.exports = {
                 if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
                 }
+            }
+            else {
+                // if there is nothing to build, harvest.
+                harvester.run(creep);
             }
         }
         else if (currentAction === 'build') {

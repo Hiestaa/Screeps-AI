@@ -162,7 +162,7 @@ const creepManager = {
     /*
      * Return the number of creeeps that have been spawned since the beginning of this game.
      */
-    nbCreepSpawned: () => Memory.creeps._creepsCount || 0,
+    nbCreepSpawned: () => Memory.creepsCount || 0,
     /*
      * Create a new creep at the given spawn, for the role given by name
      * Creeps are names after the role and a number indicating the number
@@ -172,10 +172,10 @@ const creepManager = {
     create: (spawn, role) => {
         console.log(`[CREEP MANAGER][CREATE] Creating ${role}[bodyParts=${ROLES[role].bodyParts.join(',')}, ` +
                     `cost=${ROLES[role].cost}] at spawn ${spawn.name}[energy=${spawn.energy}]`);
-        if (!Memory.creeps._rolesCount) { Memory.creeps._rolesCount = {}; }
-        Memory.creeps._rolesCount[role] = (Memory.creeps._rolesCount[role] || 0) + 1;
-        Memory.creeps._creepsCount = (Memory.creeps._creepsCount || 0) + 1;
-        const ext = Memory.creeps._rolesCount[role];
+        if (!Memory.rolesCount) { Memory.rolesCount = {}; }
+        Memory.rolesCount[role] = (Memory.rolesCount[role] || 0) + 1;
+        Memory.creepsCount = (Memory.creepsCount || 0) + 1;
+        const ext = Memory.rolesCount[role];
         const name = `${role[0].toUpperCase()}${role.slice(1)}${ext}`;
         return spawn.spawnCreep(ROLES[role].bodyParts, name, {
             memory: {role}
