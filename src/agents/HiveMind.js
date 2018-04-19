@@ -13,7 +13,7 @@ class HiveMind extends BaseAgent {
      * Initialize the HiveMind.
      */
     initialize() {
-        super(id, "Hive Mind", AT_HIVE_MIND, {}, {});
+        super('Hive Mind', AT_HIVE_MIND, {}, {});
 
         const colony = new Colony();
         colony.initialize(Game.spawns.Spawn1);

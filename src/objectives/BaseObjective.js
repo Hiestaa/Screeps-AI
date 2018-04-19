@@ -48,8 +48,8 @@ class BaseObjective {
     _log(msg) { console.log(`[BASE OBJECTIVE]${msg}`); }
 
     execute() {
-        throw new Error(`Not Implemented - ${type}._execute`);
-    };
+        throw new Error(`Not Implemented - ${this.type}.execute`);
+    }
 
     /**
      * Make the agent execute the objective, if it has the applicable type.
@@ -82,7 +82,7 @@ class BaseObjective {
             // applicableAgentType: this.applicableAgentType,
             params: this.params,
             state: this.state
-        }
+        };
     }
 
 }

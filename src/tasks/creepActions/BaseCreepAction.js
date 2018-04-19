@@ -16,7 +16,7 @@ const {
  * to handle the task.
  */
 
- class BaseCreepAction extends BaseTask {
+class BaseCreepAction extends BaseTask {
     /**
      * Initialize the creep action, the task will have the AT_CREEP_ACTOR
      * applicable agent type
@@ -48,7 +48,9 @@ const {
         if (!this.profiles.has(creepActor.creepProfile)) {
             throw new Error(
                 `Invalid creep profile for action: ${this.type}, ` +
-                `agent: ${creepActor.creepProfile}`)
+                `agent: ${creepActor.creepProfile}`);
         }
     }
 }
+
+module.exports = BaseCreepAction;

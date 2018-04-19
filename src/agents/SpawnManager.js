@@ -1,5 +1,4 @@
 const BaseManager = require('agents.BaseManager');
-const SpawnActor = require('agents.SpawnActor');
 const {
     AT_SPAWN_MANAGER
 } = require('constants');

@@ -1,4 +1,4 @@
-import murmurhash3_32_gc = require('utils.murmurhash3_32_gc');
+const murmurhash3_32_gc = require('utils.murmurhash3_32_gc');
 
 const CONSTANTS = [
     /* Creeps profiles */
@@ -36,7 +36,7 @@ const CONSTANTS = [
     'O_MAXIMIZE_DEFENSIVE_POWER',
     'O_MAXIMIZE_OFFENSIVE_POWER',
     /* * Colony */
-    'O_INCREASE_RCLS'
+    'O_INCREASE_RCLS',
     'O_INCREASE_EFFICIENCY',
     'O_EXTEND_MINING_OPERATIONS',
     'O_FORK_COLONY',
@@ -92,7 +92,7 @@ const CONSTANTS = [
     'A_ATTACK',
     'A_HEAL',
     'A_SPAWN'
-]
+];
 
 const SEED = 'constants';
 
@@ -104,8 +104,8 @@ const LOOKUP = {};
  */
 const DEBUG = true;
 
-for (var i = 0; i < constants.length; i++) {
-    let rep = constants[i];
+for (var i = 0; i < CONSTANTS.length; i++) {
+    let rep = CONSTANTS[i];
     let val = DEBUG ? rep : murmurhash3_32_gc(rep, SEED);
     module.exports[rep] = val;
     LOOKUP[val] = rep;
@@ -113,4 +113,4 @@ for (var i = 0; i < constants.length; i++) {
 
 module.exports.pretty = (constant) => {
     return LOOKUP[constant];
-}
+};

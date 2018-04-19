@@ -67,7 +67,7 @@ module.exports = () => {
     // now verify that each agent is still alive, this needs to be done after
     // reloading the agent's state otherwise it won't be able to know whether
     // it is alive or not
-    getAgentsList().forEach((agent, idx) => {
+    getAgentsList().forEach((agent) => {
         // if the agent isn't alive, this means the agent should be destroyed
         if (!agent.isAlive()) {
             removeAgent(agent.id);
@@ -75,7 +75,7 @@ module.exports = () => {
         else {
             deleteAgentState(agent.id);
         }
-    })
+    });
 
     // then run the agent execution function, one at a time.
     // TODO: since execution of the agent can lead to the creation of other agent,
@@ -98,11 +98,11 @@ module.exports = () => {
         // created during this turn. Create a memory spot for him.
         // If an agent was removed during this tick, it should not appear
         // in the returned list from `getAgentsList()`
-        const agentState = getOrCreateAgentState(agentId, agent);
+        const agentState = getOrCreateAgentState(agent);
         // save whether alive or not - an new actor that triggers the creation
         // of its game object will not have this game object created
         // (and thus technically alive) until the beginning of the next tick.
         // It will be deleted then if the object creation failed.
         agent.save(agentState);
-    })
+    });
 };

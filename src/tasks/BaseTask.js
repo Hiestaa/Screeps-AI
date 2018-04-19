@@ -55,8 +55,8 @@ class BaseTask extends BaseObjective {
      *                the same at each turn, although most tasks are implemented that a
      *                single agent will execute them all the way through.
      */
-    execute(agent) {
-        throw new Error(`Not Implemented - ${name}._execute`);
+    execute(/*agent*/) {
+        throw new Error(`Not Implemented - ${this.type}._execute`);
     }
 
     /**
@@ -64,7 +64,7 @@ class BaseTask extends BaseObjective {
      * Override to set a terminating condition that isn't always true.
      * @param {BaseAgent} agent - agent who executed the task.
      */
-    finished(agent) {
+    finished(/*agent*/) {
         return true;
     }
 
@@ -74,7 +74,7 @@ class BaseTask extends BaseObjective {
      */
     _finished(agent) {
         if (this._agentTypeError) { return true; }
-        return this._finished();
+        return this._finished(agent);
     }
 
     dump() {
@@ -83,4 +83,4 @@ class BaseTask extends BaseObjective {
     }
 }
 
-module.exports = BaseAction;
+module.exports = BaseTask;

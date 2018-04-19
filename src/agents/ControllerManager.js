@@ -18,9 +18,9 @@ class ControllerManager extends BaseManager {
      */
     initialize(controller, creepActorIds=[]) {
         super(`ControllerManager ${controller.attachedGameObjects.controller.room.name}`,
-              AT_CONTROLLER_MANAGER, creepActorIds, {}, {
+            AT_CONTROLLER_MANAGER, creepActorIds, {}, {
                 controller: controller.id
-              }
+            }
         );
     }
 }

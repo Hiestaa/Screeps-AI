@@ -5,7 +5,7 @@ const {
     AT_CREEP_AGENT,
     A_HARVEST
 } = require('constants');
-Harvest = require('tasks.creepActions.Harvest');
+const Harvest = require('tasks.creepActions.Harvest');
 
 /**
  * The task of being harvested is given to a source manager.
@@ -48,3 +48,5 @@ class BeHarvested extends BaseTask {
     }
 
 }
+
+module.exports = BeHarvested;

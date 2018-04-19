@@ -23,7 +23,7 @@ class Harvest extends BaseCreepAction {
      * @param {Object} [memory.state] - the state of this objective, if the objective has
      *                 already been started.
      */
-    constructor({params: {sourceId}, state}) {
+    constructor({priority, params: {sourceId}, state}) {
         super(new Set([CP_WORKER]), A_HARVEST, {
             params: {sourceId},
             state,
@@ -50,7 +50,10 @@ class Harvest extends BaseCreepAction {
      * @param {CreepActor} creepActor - creep actor executing the action
      */
     finished(creepActor) {
+        const creep = creepActor.object('creep');
         return creep.carry.energy > creep.carryCapacity - 2;
     }
 
 }
+
+module.exports = Harvest;

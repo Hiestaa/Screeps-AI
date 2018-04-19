@@ -14,7 +14,7 @@ class TowerActor extends BaseAgent {
      */
     initialize(tower) {
         super(`TowerActor ${tower.id}`, AT_TOWER_ACTOR,
-              {}, {tower: tower.id});
+            {}, {tower: tower.id});
     }
 }
 

@@ -3,8 +3,7 @@ const {
     O_INITIALIZE_ROOM,
     AT_ARCHITECT
 } = require('constants');
-DevelopSpawnerGroup = require('objectives.manager.DevelopSpawnerGroup');
-PopulateInitialGroups = require('tasks.architect.PopulateInitialGroups')
+const PopulateInitialGroups = require('tasks.architect.PopulateInitialGroups');
 
 /**
  * The InitializeRoom objective consists in getting the basic room structure
@@ -29,3 +28,5 @@ class InitializeRoom extends BaseObjective {
         }
     }
 }
+
+module.exports = InitializeRoom;

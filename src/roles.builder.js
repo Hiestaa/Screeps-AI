@@ -11,7 +11,7 @@ module.exports = {
         let currentAction = creep.memory.currentAction;
         if (!currentAction) {
             currentAction = 'harvest';
-            creep.say("🔄 Harvesting!");
+            creep.say('🔄 Harvesting!');
         }
         // idea: implement some kind of generic 'focused strategy' where actions are pushed
         // on a queue along with a condition, and creep will keep doing the action until
@@ -24,7 +24,7 @@ module.exports = {
         }
         else if (currentAction === 'harvest') {
             currentAction = 'build';
-            creep.say("🚧 Building!");
+            creep.say('🚧 Building!');
         }
         if (currentAction === 'build' && creep.carry.energy > 0) {
             // TODO: port the `sourceSelection` utility to a more generic `targetSelection`
@@ -41,7 +41,7 @@ module.exports = {
             }
         }
         else if (currentAction === 'build') {
-            currentAction = 'harvest'
+            currentAction = 'harvest';
         }
 
         creep.memory.currentAction = currentAction;

@@ -4,20 +4,24 @@ const {
     O_EXPAND_POPULATION,
     T_SPAWN
 } = require('constants');
-Spawn = require('tasks.actor.Spawn');
+const Spawn = require('tasks.actor.Spawn');
 
 
 /**
- * The ExtendPopulation schedules as many tasks as necessary on the spawn actor to
+ * The ExpandPopulation schedules as many tasks as necessary on the spawn actor to
  * get the population to expand to the desired number of profiles.
  * When the desired number of profiles is reached, the objective will maintain the
  * population at the current level by scheduling Spawn tasks when appropriate.
- * At any point of time, the architect can reassign a new ExtendPopulation objective
+ * At any point of time, the architect can reassign a new ExpandPopulation objective
  * to replace the current one.
  */
-class ExtendPopulation extends BaseObjective {
+class ExpandPopulation extends BaseObjective {
     constructor({state, params: {profiles}, priority}={}) {
-        super(O_EXPAND_POPULATION, AT_SPAWN_ACTOR, {state, params, priority});
+        super(O_EXPAND_POPULATION, AT_SPAWN_ACTOR, {
+            state,
+            params: {profiles},
+            priority
+        });
     }
 
     /**
@@ -29,7 +33,7 @@ class ExtendPopulation extends BaseObjective {
     execute(spawnActor) {
         // prevent expensive operation from running needlessly too often
         // TODO: make that a feature of the tasks and objective in a generic manner
-        if (this.state.nextExec && Game.time < his.state.nextExec) { return; }
+        if (this.state.nextExec && Game.time < this.state.nextExec) { return; }
         this.state.nextExec = Game.time + 10;
         // count (and save as this never changes within the objective's lifespan)
         // the number of creeps that should be spawned for each profile.
@@ -45,9 +49,9 @@ class ExtendPopulation extends BaseObjective {
         spawnActor._tasksList.forEach(t => {
             if (t.type === T_SPAWN) {
                 pendingPerProfile[t.params.profile] = (
-                    pendingPerProfile[t.params.profile] || 0) + 1
+                    pendingPerProfile[t.params.profile] || 0) + 1;
             }
-        })
+        });
 
         Object.keys(this.state.nbPerProfile).forEach(profile => {
             // number of creeps we still need to create

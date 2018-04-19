@@ -1,8 +1,8 @@
 const {
     AT_CREEP_ACTOR
 } = require('constants');
-CreepActor = require('agents.CreepActor');
-{
+const CreepActor = require('agents.CreepActor');
+const {
     getAgentById
 } = require('agents.AgentsManager.storage');
 
@@ -47,7 +47,7 @@ exports.buildPendingCreepActor = (spawn, profile, architectId) => {
     });
 
     return code;
-}
+};
 
 /**
  * Verify if any of the pending new agent is ready for creation.
@@ -57,7 +57,7 @@ exports.buildPendingCreepActor = (spawn, profile, architectId) => {
  */
 exports.verifyPendingAgents = () => {
     const created = [];
-    Memory.pendingNewAgents.forEach(({type, id, handlerId}, idx) => {
+    Memory.pendingNewAgents.forEach(({type, id, handlerId}) => {
         if (type === AT_CREEP_ACTOR) {
             // creeps are id'ed by name in this array
             const creep = Game.creeps[id];
@@ -72,9 +72,9 @@ exports.verifyPendingAgents = () => {
                 '[ERROR][AGENT MANAGER STORAGE] Dont\'t know ' +
                 'what to do with pending agent type: ', type);
         }
-    }
+    });
 
     created.forEach(idx => {
         Memory.pendingNewAgents.splice(idx, 1);
-    })
-}
+    });
+};

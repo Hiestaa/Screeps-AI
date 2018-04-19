@@ -4,6 +4,7 @@ const {
     CPS_FAST,
     CPS_SWIFT
 } = require('constants');
+const counter = require('creepsProfiles.counter');
 
 /**
  * Base class for all creep profiles
@@ -62,8 +63,12 @@ class BaseProfile {
         this.speed = speed;
     }
 
+    /**
+     * Generates a unique name for this creep
+     * @return {string}
+     */
     getCreepName() {
-        return `${this.name}#${counter[this.name]}`;
+        return `${this.name}#${counter(this.name)}`;
     }
 }
 

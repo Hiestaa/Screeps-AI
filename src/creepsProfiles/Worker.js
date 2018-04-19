@@ -17,7 +17,7 @@ class WorkerProfile extends BaseProfile {
     constructor(toughness, efficiency, speed) {
         super(CP_WORKER, WORK, [
             WORK, CARRY
-        ], toughness || 0, efficiency || 0, speed,|| CP_SLOW);
+        ], toughness || 0, efficiency || 0, speed || CP_SLOW);
     }
 }
 

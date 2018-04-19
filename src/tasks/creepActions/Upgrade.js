@@ -35,6 +35,7 @@ class Upgrade extends BaseCreepAction {
     execute(creepActor) {
         super(creepActor);
         const target = Game.getObjectById(this.params.controllerId);
+        const creep = creepActor.object('creep');
         if(creep.upgradeController(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
         }
@@ -45,7 +46,10 @@ class Upgrade extends BaseCreepAction {
      * @param {CreepActor} creepActor - creep actor executing the action
      */
     finished(creepActor) {
+        const creep = creepActor.object('creep');
         return creep.carry.energy == 0;
     }
 
 }
+
+module.exports = Upgrade;

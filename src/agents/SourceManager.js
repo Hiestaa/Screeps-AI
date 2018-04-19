@@ -16,9 +16,9 @@ class SourceManager extends BaseManager {
      */
     initialize(source, creepActorIds=[]) {
         super(`SourceManager ${source.id}`,
-              AT_SOURCE_MANAGER, creepActorIds, {}, {
-                source: sourceActor.id
-              }
+            AT_SOURCE_MANAGER, creepActorIds, {}, {
+                source: source.id
+            }
         );
         this.nbMiningSpots = 0;
     }

@@ -1,4 +1,7 @@
 const BaseAgent = require('agents.BaseAgent');
+const {
+    AT_CREEP_ACTOR
+} = require('constants');
 
 /**
  * The Manager is instanciated on request of an architect and is an abstraction
@@ -27,7 +30,7 @@ class BaseManager extends BaseAgent {
         creepActorIds = creepActorIds || [];
         attachedAgentIds = attachedAgentIds || {};
         for (let i = 0; i < creepActorIds.length; i++) {
-            attachedAgentIds[`creep_${i}'`]] = creepActorIds[i];
+            attachedAgentIds[`creep_${i}'`] = creepActorIds[i];
         }
         this.nbCreepActors = creepActorIds.length;
         this.totalCreepActors = creepActorIds.length;
@@ -37,7 +40,7 @@ class BaseManager extends BaseAgent {
     load(state) {
         super(state);
         this.nbCreepActors = state.nbCreepActors;
-        this.totalCreepActors = state.totalCreepActors
+        this.totalCreepActors = state.totalCreepActors;
     }
 
     save(state) {

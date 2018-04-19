@@ -7,4 +7,4 @@ Memory.profilesCount = Memory.profilesCount || {};
 module.exports = (profile) => {
     Memory.profilesCount[profile] = (Memory.profilesCount[profile] || 0) + 1;
     return Memory.profilesCount[profile];
-}
+};

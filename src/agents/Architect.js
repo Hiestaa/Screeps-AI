@@ -3,7 +3,6 @@ const SourceManager = require('agents.SourceManager');
 const SpawnManager = require('agents.SpawnManager');
 // const BuildingManager = require('agents.BuildingManager');
 const ControllerManager = require('agents.ControllerManager');
-const {getAgentById} = require('agents.AgentsManager.storage');
 
 const {
     AT_ARCHITECT
@@ -22,8 +21,9 @@ class Architect extends BaseAgent {
      * @param {Room} - the room this architect is attached to
      */
     initialize(room) {
-        super(`Architect ${room.name}`, AT_ARCHITECT,
-              {}, {room: room.id});
+        super(
+            `Architect ${room.name}`, AT_ARCHITECT,
+            {}, {room: room.id});
 
         // when creeps appear in the room without assigned to a manager,
         // they are added to this array so the architect can assign them
@@ -34,7 +34,7 @@ class Architect extends BaseAgent {
         sources.forEach((source, idx) => {
             const sourceManager = new SourceManager();
             sourceManager.initialize(source);
-            this.attachAgent(`source_${idx}`, sourceManager)''
+            this.attachAgent(`source_${idx}`, sourceManager);
         });
 
         const structures = room.find(FIND_STRUCTURES);
@@ -94,9 +94,9 @@ class Architect extends BaseAgent {
     countMiningSpots() {
         return _.sum(
             Object.keys(this.attachedAgents)
-            .filter(k => k.startsWith('source_'))
-            .map(k => this.agent(k))
-            .map(s => s.getNbMiningSpots()));
+                .filter(k => k.startsWith('source_'))
+                .map(k => this.agent(k))
+                .map(s => s.getNbMiningSpots()));
     }
 }
 

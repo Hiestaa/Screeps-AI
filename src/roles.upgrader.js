@@ -10,7 +10,7 @@ module.exports = {
         let currentAction = creep.memory.currentAction;
         if (!currentAction) {
             currentAction = 'harvest';
-            creep.say("🔄 Harvesting!");
+            creep.say('🔄 Harvesting!');
         }
         // idea: implement some kind of generic 'focused strategy' where actions are pushed
         // on a queue along with a condition, and creep will keep doing the action until
@@ -23,7 +23,7 @@ module.exports = {
         }
         else if (currentAction === 'harvest') {
             currentAction = 'upgrade';
-            creep.say("🚧 Upgrading!");
+            creep.say('🚧 Upgrading!');
         }
         if (currentAction === 'upgrade' && creep.carry.energy > 0) {
             if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
@@ -31,7 +31,7 @@ module.exports = {
             }
         }
         else if (currentAction === 'upgrade') {
-            currentAction = 'harvest'
+            currentAction = 'harvest';
         }
 
         creep.memory.currentAction = currentAction;

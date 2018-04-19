@@ -3,7 +3,7 @@ const {
     AT_SOURCE_MANAGER,
     O_DISTRIBUTE_ENERGY
 } = require('constants');
-BeHarvested = require('tasks.manager.BeHarvested');
+const BeHarvested = require('tasks.manager.BeHarvested');
 
 // The BeHarvested task will incurr a significant loop over all agents
 // Avoid doing that too often, since a harvest task in itself takes a

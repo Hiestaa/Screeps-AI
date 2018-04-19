@@ -1,4 +1,4 @@
-0const BaseManager = require('agents.BaseManager');
+const BaseManager = require('agents.BaseManager');
 const {
     AT_BUILDING_MANAGER
 } = require('constants');
@@ -18,19 +18,22 @@ class BuildingManager extends BaseManager {
 
     /**
      * Initialize the building manager
+     * @param {String} roomName - name of the room this building manager is
+     *                 dedicated to, for naming purposes.
      * @param {Array} creepActorIds - list of ids of creep actors that should
      *                be managed by this agent
      * @param {Array} constructionSiteIds - list of ids of construction sites
      *                this building manager should take care of completing and maintaining.
      */
-    initialize(creepActorIds=[], constructionSiteIds=[]) {
+    initialize(roomName, creepActorIds=[], constructionSiteIds=[]) {
         constructionSiteIds = constructionSiteIds || [];
         const attachedGameObjectIds = {};
         for (var i = 0; i < constructionSiteIds.length; i++) {
             attachedGameObjectIds[`constructionSite_${i}`] = constructionSiteIds[i];
         }
-        super(`BuildingManager`, AT_BUILDING_MANAGER,
-              creepActorIds, {}, attachedGameObjectIds);
+        super(
+            'BuildingManager', AT_BUILDING_MANAGER,
+            creepActorIds, {}, attachedGameObjectIds);
     }
 
     load(state) { super(state); this.nbBuildingActors = state.nbBuildingActors; }

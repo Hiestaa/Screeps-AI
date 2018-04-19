@@ -5,7 +5,7 @@ Memory.sources = Memory.sources || {};
  * This only account for static items (or items that move rarely, such as walls)
  * because the computation only happens at import time
  */
-const availableSpots = {}
+const availableSpots = {};
 Object.keys(Game.spawns).forEach(spawnName => {
     // Game.spawns[spawnName].room.memory.sources = {};
     Game.spawns[spawnName].room.find(FIND_SOURCES).forEach(source => {
@@ -35,14 +35,14 @@ Object.keys(Game.spawns).forEach(spawnName => {
 // it's not gonna be reset too often, but when it does, no biggie, it's just cached computations
 // overcroweded state and end-time marker
 let overcrowded = {};  // room name -> end timer (or false)
-const OVERCROWDED_DURATION = 1000
+const OVERCROWDED_DURATION = 1000;
 // remembers for ASSIGNMENT_DURATION ticks which source is assigned to a creep
 // so we don't assign more than MAX_OVER_ASSIGNMENT more creeps than the source can support
 // this doesn't apply in overcrowded state
 const ASSIGNMENT_DURATION = 10000;
 const MAX_OVER_ASSIGNMENT = 3;
-const assignedSource = {}  // creeep id -> {source: source object, end: Game.time after which the assignment ends}
-const assignedCreeps = {}  // source id -> number of creeps
+const assignedSource = {};  // creeep id -> {source: source object, end: Game.time after which the assignment ends}
+const assignedCreeps = {};  // source id -> number of creeps
 
 /*
  * Select the closest source to the given creep that has an empty spot to mine from,
@@ -81,7 +81,7 @@ function selectSource(creep, includeBusy) {
         if (Game.time < overcrowded[creep.room.name]) {
             return selectSource(creep, true);
         }
-        console.log(`[UTILS][SELECT SOURCE] Overcrowded terminated ` +
+        console.log('[UTILS][SELECT SOURCE] Overcrowded terminated ' +
                     `[room=${creep.room.name}, game.time=${Game.time}]`);
         overcrowded[creep.room.name] = false;
     }
@@ -136,8 +136,8 @@ function selectSource(creep, includeBusy) {
     assignedSource[creep.id] = {source: closestSource.id, end: Game.time + ASSIGNMENT_DURATION};
     creep.memory.assignedSource = assignedSource[creep.id];
     assignedCreeps[closestSource.id] = (assignedCreeps[closestSource.id] || 0) + 1;
-    Memory.sources[closestSource.id] = Memory.sources[closestSource.id] || {}
-    Memory.sources[closestSource.id].assignedCreeps = (Memory.sources[closestSource.id].assignedCreeps || 0) + 1
+    Memory.sources[closestSource.id] = Memory.sources[closestSource.id] || {};
+    Memory.sources[closestSource.id].assignedCreeps = (Memory.sources[closestSource.id].assignedCreeps || 0) + 1;
     console.log(`[UTILS][SELECT SOURCE] Source assigned [creep=${creep.name}, ` +
                 `source=${closestSource.id}, until=${Game.time + ASSIGNMENT_DURATION}, ` +
                 `total=${Memory.sources[closestSource.id].assignedCreeps}]`);

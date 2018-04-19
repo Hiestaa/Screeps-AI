@@ -1,5 +1,6 @@
 const BaseAgent = require('agents.BaseAgent');
 const Architect = require('agents.Architect');
+const SpawnActor = require('agents.SpawnActor');
 const {
     AT_COLONY
 } = require('constants');
@@ -23,7 +24,7 @@ class Colony extends BaseAgent {
 
         const architect = new Architect();
         architect.initialize(spawn.room);
-        this.attachAgent('spawnRoomArchitect', archited);
+        this.attachAgent('spawnRoomArchitect', architect);
 
         // many more Architects will be attached to this agent as deemed necessary
         // by the executed tasks. However, only one room exists at the initialization phase.

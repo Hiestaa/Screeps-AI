@@ -1,17 +1,18 @@
 const BaseTask = require('tasks.BaseTask');
 const {
+    getAgentById
+} = require('agents.AgentsManager.storage');
+const {
     T_POPULATE_INITIAL_GROUPS,
     AT_ARCHITECT
 } = require('constants');
-InitializeRoom = require('tasks.architect.InitializeRoom');
-
 
 // more than one because at this point there is no dedicated hauler (there might never be)
 const CREEP_PER_MINING_SPOT = 1.5;
 
 // 100% of the creep capacity for this room should be dedicated to filling up the spawn
 // TODO: make that a 20%
-const NB_CREEPS_FOR_SPAWN = 1.0;
+// const NB_CREEPS_FOR_SPAWN = 1.0;
 
 /**
  * Assign creepActors to the initial groups.
@@ -44,7 +45,7 @@ class PopulateInitialGroups extends BaseTask {
         const creepActorsForSources = Array.from(creepActors);
         // for each source manager, assign as many new agent as there is empty spots
         const sourceManagers = architect.getSourceManagers().map(sm => {
-            const nbMiningSpots = sm.getNbMiningSpots()
+            const nbMiningSpots = sm.getNbMiningSpots();
             const emptySpots = nbMiningSpots * CREEP_PER_MINING_SPOT - sm.nbCreepActors;
             if (emptySpots > 0) {
                 creepActorsForSources.splice(0, emptySpots).forEach(creepActor => {
@@ -61,7 +62,7 @@ class PopulateInitialGroups extends BaseTask {
 
         // now distribute all creeps to the spawner
         // this will be improved shortly
-        creepActors.forEach(creepActors => {
+        creepActors.forEach(creepActor => {
             this.agent('spawn').handleNewAgent(creepActor);
         });
 
@@ -70,3 +71,5 @@ class PopulateInitialGroups extends BaseTask {
         // the creeps should start receiving tasks!
     }
 }
+
+module.exports = PopulateInitialGroups;

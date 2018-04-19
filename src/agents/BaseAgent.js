@@ -2,9 +2,8 @@ const {
     getAgentById,
     addAgent
 } = require('agents.AgentsManager.storage');
-const actions = requite('actions');
-const tasks = requite('tasks');
-const objectives = requite('objectives');
+const tasks = require('tasks');
+const objectives = require('objectives');
 const genId = require('utils.id');
 
 /**
@@ -72,7 +71,7 @@ class BaseAgent {
         this.attachedGameObjects = {};  // will be refreshed with new game objects after each tick
 
         Object.keys(this.attachedAgentIds).forEach(key => {
-            this.attachedAgents[key] = AgentManager.getAgentById(this.attachedAgentIds[key]);
+            this.attachedAgents[key] = getAgentById(this.attachedAgentIds[key]);
         });
 
         Object.keys(this.attachedGameObjectIds).forEach(key => {
@@ -98,7 +97,7 @@ class BaseAgent {
      * @return {String} the location where to save and restore memory.
      */
     memoryLocation() {
-        return `agents.${this.id}`
+        return `agents.${this.id}`;
     }
 
     /**
@@ -115,14 +114,14 @@ class BaseAgent {
         this.name = memory.name;
         this.type = memory.type;
 
-        this.attachedAgentIds = memory.attachedAgentIds
+        this.attachedAgentIds = memory.attachedAgentIds;
         this.attachedGameObjectIds = memory.attachedGameObjectIds;
 
         this.attachedAgents = {};
         this.attachedGameObjects = {};
 
         Object.keys(this.attachedAgentIds).forEach(key => {
-            this.attachedAgents[key] = AgentManager.getAgentById(this.attachedAgentIds[key]);
+            this.attachedAgents[key] = getAgentById(this.attachedAgentIds[key]);
         });
 
         Object.keys(this.attachedGameObjectIds).forEach(key => {
@@ -133,11 +132,11 @@ class BaseAgent {
             this.currentTask = new tasks[memory.currentTask.name](memory.currentTask);
         }
         if (memory.currentObjective) {
-            this.currentObjective = new tasks[memory.currentObjective.name](memory.currentObjective);
+            this.currentObjective = new objectives[memory.currentObjective.name](memory.currentObjective);
         }
         memory._tasksList.forEach(task => {
             this._tasksList.push(new tasks[task.name](task));
-        })
+        });
     }
 
     /**
@@ -213,7 +212,7 @@ class BaseAgent {
         return (
             (this.currentTask && this.currentTask.type === taskType) ||
             (_.some(this._tasksList.find(t => t.type === taskType)))
-        )
+        );
     }
 
     /**
@@ -236,7 +235,7 @@ class BaseAgent {
      * @param {BaseObjective} objective - the objective to be executed
      */
     setObjective(objective) {
-        this.currentObjective = objective
+        this.currentObjective = objective;
     }
 
     /**
@@ -274,7 +273,7 @@ class BaseAgent {
      * Override to attach the given agent to some key of the current agent.
      * @param {BaseAgent} agent - the created agent to handle
      */
-    handleNewAgent(agent) { }
+    handleNewAgent(/*agent*/) { }
 }
 
 module.exports = BaseAgent;

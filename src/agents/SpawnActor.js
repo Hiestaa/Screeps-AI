@@ -14,7 +14,7 @@ class SpawnActor extends BaseAgent {
      */
     initialize(spawn) {
         super(`SpawnActor ${spawn.name}`,
-              AT_SPAWN_ACTOR, {}, {spawn: spawn.id});
+            AT_SPAWN_ACTOR, {}, {spawn: spawn.id});
 
         // name -> profile
         // remembers which creeps were spawned by that particular spawn
@@ -22,7 +22,7 @@ class SpawnActor extends BaseAgent {
         this.profilesSpawned = {};
 
         // profile -> number of creeps alive of that profile (spawned by this actor)
-        this.nbSpawnedByProfile = {}
+        this.nbSpawnedByProfile = {};
     }
 
     load(state) {

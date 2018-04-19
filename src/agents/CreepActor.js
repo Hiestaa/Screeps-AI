@@ -1,7 +1,6 @@
 const BaseAgent = require('agents.BaseAgent');
 const {
-    AT_CREEP_AGENT,
-    CP_WORKER
+    AT_CREEP_AGENT
 } = require('constants');
 
 /**

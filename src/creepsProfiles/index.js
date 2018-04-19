@@ -3,5 +3,5 @@ const {
 } = require('constants');
 
 module.exports = {
-    [CP_WORKER]: require('creepsProfiles.Worker');
-}
+    [CP_WORKER]: require('creepsProfiles.Worker')
+};

@@ -2,20 +2,18 @@ const BaseTask = require('tasks.BaseTask');
 const {
     T_INITIALIZE_COLONY,
     AT_COLONY,
-    CP_WORKER,
-    O_EXPAND_POPULATION
+    CP_WORKER
 } = require('constants');
-InitializeRoom = require('tasks.architect.InitializeRoom');
-
-
-const CREEP_PER_MINING_SPOT = 1.5;
-
-// 100% of the creep capacity for this room should be dedicated to filling up the spawn
-// TODO: make that a 20%
-const NB_CREEPS_FOR_SPAWN = 1.0;
+const InitializeRoom = require('tasks.architect.InitializeRoom');
+const ExpandPopulation = require('objectives.actor.ExpandPopulation');
+const {
+    CREEP_PER_MINING_SPOT
+} = require('settings');
 
 /**
- * The InitializeColony will schedule the 'InitializeRoom' task on the
+ * This task will compute the number of creeps needed to initialize the
+ * colony, and schedule the `ExpandPopulation` task on the spawn actor accordingly.
+ * On top of that, it will schedule the 'InitializeRoom' task on the
  * architect dedicated to the spawn room.
  */
 class InitializeColony extends BaseTask {
@@ -28,11 +26,10 @@ class InitializeColony extends BaseTask {
         const nbSpots = architect.countMiningSpots();
 
         const nbCreeps = nbSpots * CREEP_PER_MINING_SPOT;
-        const nbCreepsForSpawn = nbCreeps * NB_CREEPS_FOR_SPAWN
         const profiles = [];
 
-        for (var i = 0; i < NB_CREEPS_FOR_SPAWN; i++) {
-            profiles.push(CP_WORKER)
+        for (var i = 0; i < nbCreeps; i++) {
+            profiles.push(CP_WORKER);
         }
 
         colony.agent('spawnActor').setObjective(
@@ -40,3 +37,5 @@ class InitializeColony extends BaseTask {
         architect.scheduleTask(new InitializeRoom());
     }
 }
+
+module.exports = InitializeColony;

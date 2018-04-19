@@ -20,10 +20,20 @@
         "semi": [
             "error",
             "always"
+        ],
+        "no-console": [
+            "off"
         ]
     },
     "globals": {
+        "_": true,
         "Game": true,
+        "Memory": true,
+        "RoomPosition": true,
+        "Creep": true,
+        "Structure": true,
+        "StructureSpawn": true,
+        "Flag": true,
         "OK": true,
         "ERR_NOT_OWNER": true,
         "ERR_NO_PATH": true,

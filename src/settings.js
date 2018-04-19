@@ -1,0 +1,1 @@
+exports.CREEP_PER_MINING_SPOT = 1.5;

@@ -5,7 +5,7 @@ const {
 } = require('constants');
 const profiles = require('creepProfiles');
 
- class Spawn extends BaseTask {
+class Spawn extends BaseTask {
     constructor({priority, state, params: {profile}}) {
         super(T_SPAWN, AT_SPAWN_ACTOR, {priority, state, params: {profile}});
     }
@@ -15,14 +15,13 @@ const profiles = require('creepProfiles');
      */
     execute(spawnActor) {
         const spawn = spawnActor.object('spawn');
-        const Profile = WorkerProfile
         let profileInstance = null;
         if (!this.state.cost) {
-            profileInstance = profileInstance || new profiles[profile]();
+            profileInstance = profileInstance || new profiles[this.profile]();
             this.state.cost = profileInstance.cost;
         }
         if (spawn.energyCapacity > this.state.cost) {
-            profileInstance = profileInstance || new profiles[profile]();
+            profileInstance = profileInstance || new profiles[this.profile]();
             // TODO: now find a way to get that linked to a CreepActor, and get that
             // creepActor added to a group... Fun times.
             spawn.spawnCreep(profileInstance.bodyParts, profileInstance.getCreepName());
@@ -31,6 +30,8 @@ const profiles = require('creepProfiles');
 
     finished(spawnActor) {
         const spawn = spawnActor.object('spawn');
-        return spawn.energyCapacity > this.state.cost
+        return spawn.energyCapacity > this.state.cost;
     }
 }
+
+module.exports = Spawn;
