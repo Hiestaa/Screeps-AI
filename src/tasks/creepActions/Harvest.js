@@ -1,4 +1,4 @@
-const BaseCreepAction = require('actions.BaseCreepAction');
+const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
     A_HARVEST,
     CP_WORKER
@@ -32,7 +32,7 @@ class Harvest extends BaseCreepAction {
     }
 
     execute(creepActor) {
-        super(creepActor);
+        super.execute(creepActor);
         const creep = creepActor.attachedGameObjects.creep;
         if(creep.carry.energy < creep.carryCapacity) {
             var source = Game.getObjectById(this.params.sourceId);

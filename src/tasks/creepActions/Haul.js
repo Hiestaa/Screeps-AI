@@ -1,4 +1,4 @@
-const BaseCreepAction = require('actions.BaseCreepAction');
+const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
     A_HAUL,
     CP_WORKER,
@@ -33,7 +33,7 @@ class Haul extends BaseCreepAction {
     }
 
     execute(creepActor) {
-        super(creepActor);
+        super.execute(creepActor);
         const creep = creepActor.object('creep');
         const target = Game.getObjectById(this.params.targetId);
         if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

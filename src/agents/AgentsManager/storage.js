@@ -26,15 +26,13 @@ exports.getAgentsList = () => {
  * This will loop over the entire list to index the agents by id.
  */
 exports.setAgentsList = (agentsList) => {
+    // console.log('[DEBUG][STORAGE][SET AGENTS LIST]');
     agents = agentsList;
     agents.forEach(a => { agents[a.id] = a; });
 };
 
-exports.getAgentsMap = () => {
-    return agentsById;
-};
-
 exports.addAgent = (agent) => {
+    // console.log(`[DEBUG][STORAGE][ADD AGENT] name=${agent.name}, type=${agent.type}`);
     agents.push(agent);
     agentsById[agent.id] = agent;
 };
@@ -47,9 +45,10 @@ exports.addAgent = (agent) => {
  * @param {BaseAgent} agent - the agent to remove
  */
 exports.removeAgent = (agent) => {
+    // console.log(`[DEBUG][STORAGE][ADD AGENT] name=${agent.name}, type=${agent.type}`);
     delete agentsById[agent.id];
     deletedAgents[agent.id] = true;
-    exports.deleteAgentState(agent.id);
+    deleteAgentState(agent.id);
 };
 
 exports.getAgentById = (agentId) => {
@@ -72,7 +71,7 @@ exports.getAgentState = (agentId) => {
     const memLoc = Memory.agentsList[agentId].split('.');
     let memory = Memory;
     for (var i = 0; i < memLoc.length; i++) {
-        if (memory) { return memory; }
+        if (!memory[memLoc[i]]) { return memory; }
         memory = memory[memLoc[i]];
     }
     return memory;
@@ -87,6 +86,7 @@ exports.getAgentState = (agentId) => {
 exports.getOrCreateAgentState = (agent) => {
     let memory = Memory;
     Memory.agentsList[agent.id] = agent.memoryLocation();
+    // console.log(`[INFO][AGENTS MANAGER][GET/CREATE STATE] agentId=${agent.id}, memLoc=${Memory.agentsList[agent.id]}`);
     const memLoc = Memory.agentsList[agent.id].split('.');
     for (var i = 0; i < memLoc.length; i++) {
         if (!memory[memLoc[i]]) { memory[memLoc[i]] = {}; }
@@ -98,26 +98,44 @@ exports.getOrCreateAgentState = (agent) => {
 /**
  * Get rid of any trace of the agent's memory.
  */
-exports.deleteAgentState = (agentId) => {
+const deleteAgentState = (agentId) => {
     if (Memory.agentsList[agentId]) {
-        const memLoc = Memory.agentsList[agentId].split();
-        let memory = null;
+        // console.log(`[INFO][AGENTS MANAGER][DELETE STATE] agentId=${agentId}, memLoc=${Memory.agentsList[agentId]}`);
+        const memLoc = Memory.agentsList[agentId].split('.');
+        let memory = Memory;
         delete Memory.agentsList[agentId];
 
-        for (var i = 0; i < memLoc.length; i++) {
+        for (var i = 0; i < memLoc.length - 1; i++) {
             memory = memory[memLoc[i]];
             if (!memory) { break; }  // agent memory is empty
-            if (i === memLoc.length - 1) {
-                delete memory[memLoc[i]];
-            }
+
+        }
+        if (memory) {
+            delete memory[memLoc[memLoc.length - 1]];
         }
     }
 };
 
 /**
  * Returns the list of ids of agents for which we have a saved state
+ * We need to return the `agentsList` here, the `Memory.agents` may
+ * not hold all ids since some agents can change the memory location
  */
 exports.getExistingAgentIds = () => {
     return Object.keys(Memory.agentsList);
 };
 
+/**
+ * Entirely clears up all agents storage and memory
+ * Do not call unless you know what you're doing.
+ * Note that module/global variables may not be properly cleared up at the next
+ * tick if server node handles the tick.
+ */
+exports.clearStorage = () => {
+    Memory.agents = {};
+    Memory.agentsList = {};
+    agents = [];
+    Object.keys(agentsById).forEach(k => { delete agentsById[k]; });
+    deletedAgents = {};
+    console.log('/!\\ STORAGE CLEARED /!\\');
+};

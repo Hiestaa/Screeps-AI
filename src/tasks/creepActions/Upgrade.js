@@ -1,4 +1,4 @@
-const BaseCreepAction = require('actions.BaseCreepAction');
+const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
     A_UPGRADE,
     CP_WORKER
@@ -33,7 +33,7 @@ class Upgrade extends BaseCreepAction {
     }
 
     execute(creepActor) {
-        super(creepActor);
+        super.execute(creepActor);
         const target = Game.getObjectById(this.params.controllerId);
         const creep = creepActor.object('creep');
         if(creep.upgradeController(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

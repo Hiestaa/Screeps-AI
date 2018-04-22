@@ -1,4 +1,4 @@
-const murmurhash3_32_gc = require('utils.murmurhash3_32_gc');
+const murmurhash3_gc = require('utils.murmurhash3_gc');
 
 const CONSTANTS = [
     /* Creeps profiles */
@@ -26,7 +26,6 @@ const CONSTANTS = [
     'AT_BUILDING_MANAGER',  // attached to a list of building structs and creep actors
     'AT_ACTOR',  // not actually used, specify one of the types below
     'AT_CREEP_ACTOR',  // attached to a creep
-    'AT_CONTROLLER_ACTOR',  // attached to a controller
     'AT_SPAWN_ACTOR',  // attached to a spawn
     'AT_TOWER_ACTOR',  // attached to a tower
 
@@ -106,7 +105,7 @@ const DEBUG = true;
 
 for (var i = 0; i < CONSTANTS.length; i++) {
     let rep = CONSTANTS[i];
-    let val = DEBUG ? rep : murmurhash3_32_gc(rep, SEED);
+    let val = DEBUG ? rep : murmurhash3_gc(rep, SEED);
     module.exports[rep] = val;
     LOOKUP[val] = rep;
 }

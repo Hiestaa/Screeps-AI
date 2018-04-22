@@ -34,17 +34,17 @@ class BaseManager extends BaseAgent {
         }
         this.nbCreepActors = creepActorIds.length;
         this.totalCreepActors = creepActorIds.length;
-        super(name, type, attachedAgentIds, attachedGameObjectIds);
+        super.initialize(name, type, attachedAgentIds, attachedGameObjectIds);
     }
 
     load(state) {
-        super(state);
+        super.load(state);
         this.nbCreepActors = state.nbCreepActors;
         this.totalCreepActors = state.totalCreepActors;
     }
 
     save(state) {
-        super(state);
+        super.save(state);
         state.nbCreepActors = this.nbCreepActors;
         state.totalCreepActors = this.totalCreepActors;
     }

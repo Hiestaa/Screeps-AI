@@ -63,6 +63,7 @@ class BaseAgent {
      * @param {Object} attachedGameObjectIds - mapping between strings keys and game object ids.
      */
     initialize(name, type, attachedAgentIds, attachedGameObjectIds) {
+        console.log(`[DEBUG][BASE AGENT][INITIALIZE] type=${type} name=${name}`);
         this.name = name;
         this.type = type;
         this.attachedAgentIds = attachedAgentIds || {};
@@ -111,6 +112,7 @@ class BaseAgent {
      * @param {Object} memory - pointer over a Memory location in which the agent state can be found
      */
     load(memory) {
+        // console.log(`[DEBUG][BASE AGENT][LOAD] name=${this.name} type=${this.type}`);
         this.name = memory.name;
         this.type = memory.type;
 
@@ -129,13 +131,13 @@ class BaseAgent {
         });
 
         if (memory.currentTask) {
-            this.currentTask = new tasks[memory.currentTask.name](memory.currentTask);
+            this.currentTask = new tasks[memory.currentTask.type](memory.currentTask);
         }
         if (memory.currentObjective) {
-            this.currentObjective = new objectives[memory.currentObjective.name](memory.currentObjective);
+            this.currentObjective = new objectives[memory.currentObjective.type](memory.currentObjective);
         }
         memory._tasksList.forEach(task => {
-            this._tasksList.push(new tasks[task.name](task));
+            this._tasksList.push(new tasks[task.type](task));
         });
     }
 
@@ -143,7 +145,13 @@ class BaseAgent {
      * Run the action, task and
      */
     run() {
+        if (!this.currentTask && !this.currentObjective && this._tasksList.length == 0) {
+            console.log(`[DEBUG][BASE AGENT][RUN] Idle (name=${this.name} type=${this.type})`);
+            return;
+        }
+        console.log(`[DEBUG][BASE AGENT][RUN] name=${this.name} type=${this.type}`);
         if (this.currentTask) {
+            console.log(`[DEBUG][BASE AGENT][RUN] > Executing Task ${this.currentTask.type} params=${JSON.stringify(this.currentTask.params)} state=${JSON.stringify(this.currentTask.state)}`);
             this.currentTask._execute(this);
             if (this.currentTask._finished(this)) {
                 this.currentTask = null;
@@ -151,17 +159,20 @@ class BaseAgent {
         }
 
         if (this.currentObjective) {
+            console.log(`[DEBUG][BASE AGENT][RUN] > Executing Objective ${this.currentObjective.type} params=${JSON.stringify(this.currentObjective.params)} state=${JSON.stringify(this.currentObjective.state)}`);
             this.currentObjective._execute(this);
         }
 
         // pick next task if the current one is done executing
-        if (!this.currentTask) {
+        if (!this.currentTask && this._tasksList && this._tasksList.length > 0) {
             // sort in ascending priority
             this._tasksList.sort((t1, t2) => t1.priority - t2.priority);
             // pop the last item of the list as the  current task
             this.currentTask = this._tasksList.pop();
+            console.log(`[DEBUG][BASE AGENT][RUN] > Next task: ${this.currentTask.type}`);
         }
 
+        console.log(`[DEBUG][BASE AGENT][RUN FINISHED] name=${this.name} type=${this.type}`);
     }
 
     /*
@@ -169,6 +180,7 @@ class BaseAgent {
      * @param {Object} memory - the memory location at which to store the agent state
      */
     save(memory) {
+        // console.log(`[DEBUG][BASE AGENT][SAVE] name=${this.name} type=${this.type}`);
         memory.id = this.id;
         memory.name = this.name;
         memory.type = this.type;
@@ -222,6 +234,7 @@ class BaseAgent {
      * @param {BaseTask} task - the task to be executed
      */
     scheduleTask(task) {
+        console.log(`[DEBUG][BASE AGENT][SCHEDULE TASK] type=${task.type} params=${JSON.stringify(task.params)} state=${JSON.stringify(task.state)}`);
         if (this.currentTask === null) {
             this.currentTask = task;
         }
@@ -235,6 +248,7 @@ class BaseAgent {
      * @param {BaseObjective} objective - the objective to be executed
      */
     setObjective(objective) {
+        console.log(`[DEBUG][BASE AGENT][SET OBJECTIVE] type=${objective.type} params=${JSON.stringify(objective.params)} state=${JSON.stringify(objective.state)}`);
         this.currentObjective = objective;
     }
 

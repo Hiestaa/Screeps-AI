@@ -23,7 +23,7 @@ class CreepActor extends BaseAgent {
      */
     initialize(creep, creepProfile) {
         this.creepProfile = creepProfile;
-        super(`CreepActor ${creep.name}`, AT_CREEP_AGENT, {}, {
+        super.initialize(`CreepActor ${creep.name}`, AT_CREEP_AGENT, {}, {
             creep: creep.name
         });
     }
@@ -58,9 +58,9 @@ class CreepActor extends BaseAgent {
         return `creeps.${this.attachedGameObjectIds.creep}`;
     }
 
-    load(state) { super(state); this.creepProfile = state.creepProfile; }
+    load(state) { super.load(state); this.creepProfile = state.creepProfile; }
 
-    save(state) { super(state); state.creepProfile = this. creepProfile; }
+    save(state) { super.save(state); state.creepProfile = this. creepProfile; }
 
     isAlive() {
         return (

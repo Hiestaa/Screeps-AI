@@ -38,6 +38,7 @@ class BaseObjective {
      *                 already been started.
      */
     constructor(type, applicableAgentType, {params, state}) {
+        console.log(`[DEBUG][BASE OBJECTIVE][CONSTRUCTOR] type=${type} params=${JSON.stringify(params)} state=${JSON.stringify(state)}`);
         this.type = type;
         this.applicableAgentType = applicableAgentType;
         this._agentTypeError = false;

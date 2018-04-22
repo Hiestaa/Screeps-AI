@@ -17,7 +17,7 @@ class ControllerManager extends BaseManager {
      * @param {Array} creepActorIds - ids of creep actors this manager can control
      */
     initialize(controller, creepActorIds=[]) {
-        super(`ControllerManager ${controller.attachedGameObjects.controller.room.name}`,
+        super.initialize(`ControllerManager ${controller.attachedGameObjects.controller.room.name}`,
             AT_CONTROLLER_MANAGER, creepActorIds, {}, {
                 controller: controller.id
             }

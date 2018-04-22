@@ -13,7 +13,7 @@ class SpawnActor extends BaseAgent {
      * @param {StructureSpawn} spawn - the spawn this actor should be related to
      */
     initialize(spawn) {
-        super(`SpawnActor ${spawn.name}`,
+        super.initialize(`SpawnActor ${spawn.name}`,
             AT_SPAWN_ACTOR, {}, {spawn: spawn.id});
 
         // name -> profile
@@ -26,7 +26,7 @@ class SpawnActor extends BaseAgent {
     }
 
     load(state) {
-        super(state);
+        super.load(state);
         this.profilesSpawned = state.profilesSpawned;
         // some creeps may be dead - delete them
         Object.keys(this.profilesSpawned).forEach(k => {
@@ -40,7 +40,7 @@ class SpawnActor extends BaseAgent {
     }
 
     save(state) {
-        super(state);
+        super.save(state);
         state.profilesSpawned = this.profilesSpawned;
     }}
 

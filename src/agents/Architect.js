@@ -21,7 +21,7 @@ class Architect extends BaseAgent {
      * @param {Room} - the room this architect is attached to
      */
     initialize(room) {
-        super(
+        super.initialize(
             `Architect ${room.name}`, AT_ARCHITECT,
             {}, {room: room.id});
 
@@ -56,12 +56,12 @@ class Architect extends BaseAgent {
     }
 
     save(state) {
-        super(state);
+        super.save(state);
         state.unassignedCreepActorIds = this.unassignedCreepActorIds;
     }
 
     load(state) {
-        super(state);
+        super.load(state);
         // restore the assigned creep actor from saved id
         this.unassignedCreepActorIds = state.unassignedCreepActorIds;
     }

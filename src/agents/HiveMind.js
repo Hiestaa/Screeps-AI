@@ -13,10 +13,14 @@ class HiveMind extends BaseAgent {
      * Initialize the HiveMind.
      */
     initialize() {
-        super('Hive Mind', AT_HIVE_MIND, {}, {});
+        super.initialize('Hive Mind', AT_HIVE_MIND, {}, {});
+        const spawnNames = Object.keys(Game.spawns);
+        if (spawnNames.length == 0) {
+            return;
+        }
 
         const colony = new Colony();
-        colony.initialize(Game.spawns.Spawn1);
+        colony.initialize(Game.spawns[spawnNames[0]]);
         this.attachAgent('mainColony', colony);
 
         // more colonies will be attached when the faction has the ability

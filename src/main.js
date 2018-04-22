@@ -1,3 +1,4 @@
+require('cli');
 const run = require('agents.AgentsManager.run');
 
 const {
@@ -9,5 +10,9 @@ if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
 }
 
 module.exports.loop = function () {
+    console.log('--------------------------------------------------------------');
+    console.log('[MAIN] Tick begins.');
     run();
+    console.log('[MAIN] Tick ends.');
+    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 };

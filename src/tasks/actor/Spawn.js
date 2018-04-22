@@ -3,9 +3,9 @@ const {
     AT_SPAWN_ACTOR,
     T_SPAWN
 } = require('constants');
-const profiles = require('creepProfiles');
+const profiles = require('creepsProfiles');
 
-class Spawn extends BaseTask {
+class SpawnTask extends BaseTask {
     constructor({priority, state, params: {profile}}) {
         super(T_SPAWN, AT_SPAWN_ACTOR, {priority, state, params: {profile}});
     }
@@ -34,4 +34,4 @@ class Spawn extends BaseTask {
     }
 }
 
-module.exports = Spawn;
+module.exports = SpawnTask;

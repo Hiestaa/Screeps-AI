@@ -8,7 +8,6 @@ const {
     removeAgent,
     getAgentState,
     getOrCreateAgentState,
-    deleteAgentState,
     getExistingAgentIds,
     addAgent
 } = require('agents.AgentsManager.storage');
@@ -16,8 +15,10 @@ const {
     verifyPendingAgents
 } = require('agents.AgentsManager.build');
 const HiveMind = require('agents.HiveMind');
-
+const GetFactionStarted = require('tasks.hiveMind.GetFactionStarted');
 const agentClasses = require('agents');
+
+Memory.pause = Memory.pause || false;
 
 /**
  * Run for one tick.
@@ -27,6 +28,11 @@ const agentClasses = require('agents');
  * to the list of agents managed.
  */
 module.exports = () => {
+    if (Memory.pause) {
+        console.log(
+            '[AGENTS MANAGER][RUN] Paused. Run `cli.resume()` to resume.');
+        return;
+    }
     // first recreate all the agents. We can't trust that the previous tick
     // was run on the same node so we gotta reload the whole bunch
     const agents = getExistingAgentIds().map(agentId => {
@@ -40,23 +46,30 @@ module.exports = () => {
     // other agents by id
     setAgentsList(agents);
 
-    // If we don't have any agent, nothing will happen
-    // In this case, create and initialize the Hive Mind, which will create the
-    // initial tree of agents,
-    if (agents.length === 0) {
-        const hiveMind = new HiveMind();
-        hiveMind.initialize();
-        // add the agent to the list of managed agents so it can be saved
-        // and reloaded at the next tick
-        addAgent(hiveMind);
-    }
-
     // then reload each instance. We have to have all the agents instanciated
     // in case the load function requires to load an existing agent by id.
     getAgentsList().forEach(agent => {
         agent.load(getAgentState(agent.id));
     });
 
+    // If we don't have any agent, nothing will happen
+    // In this case, create and initialize the Hive Mind, which will create the
+    // initial tree of agents. Initialized agents should be in a working state
+    // and should not need loading for this tick.
+    if (agents.length === 0) {
+        const hiveMind = new HiveMind();
+        hiveMind.initialize();
+        // add the agent to the list of managed agents so it can be saved
+        // and reloaded at the next tick
+        addAgent(hiveMind);
+
+        // schedule the 'GET_FACTION_STARTED' task on the hive-mind
+        // TODO: if we ever want to have another task assigen to the hive mind,
+        // we probably should assign some kind of generic objective that
+        // does nothing but check the conditions for scheduling future hive-mind tasks
+        // same could apply to the colony
+        hiveMind.scheduleTask(new GetFactionStarted());
+    }
     // verify that we haven't any pending new agent.
     // if we do, we need to get the agent created and initialized after the load
     // of other agents (so the agent that will handle the created one can behave
@@ -72,9 +85,6 @@ module.exports = () => {
         if (!agent.isAlive()) {
             removeAgent(agent.id);
         }
-        else {
-            deleteAgentState(agent.id);
-        }
     });
 
     // then run the agent execution function, one at a time.
@@ -88,7 +98,6 @@ module.exports = () => {
     getAgentsList().forEach(agent => {
         agent.run();
     });
-
     // only then, reprocess and save the full list.
     // Some agents may have been created and may not have had
     // a chance to execute their function at this run.
@@ -105,4 +114,12 @@ module.exports = () => {
         // It will be deleted then if the object creation failed.
         agent.save(agentState);
     });
+};
+
+module.exports.suspend = () => {
+    Memory.pause = true;
+};
+
+module.exports.resume = () => {
+    Memory.pause = false;
 };

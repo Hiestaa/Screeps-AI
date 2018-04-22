@@ -31,14 +31,14 @@ class BuildingManager extends BaseManager {
         for (var i = 0; i < constructionSiteIds.length; i++) {
             attachedGameObjectIds[`constructionSite_${i}`] = constructionSiteIds[i];
         }
-        super(
+        super.initialize(
             'BuildingManager', AT_BUILDING_MANAGER,
             creepActorIds, {}, attachedGameObjectIds);
     }
 
-    load(state) { super(state); this.nbBuildingActors = state.nbBuildingActors; }
+    load(state) { super.load(state); this.nbBuildingActors = state.nbBuildingActors; }
 
-    save(state) { super(state); state.nbBuildingActors = this.nbBuildingActors; }
+    save(state) { super.save(state); state.nbBuildingActors = this.nbBuildingActors; }
 }
 
 module.exports = BuildingManager;

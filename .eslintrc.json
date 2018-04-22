@@ -26,6 +26,10 @@
         ]
     },
     "globals": {
+        "describe": true,
+        "it": true,
+        "beforeEach": true,
+        "afterEach": true,
         "_": true,
         "Game": true,
         "Memory": true,

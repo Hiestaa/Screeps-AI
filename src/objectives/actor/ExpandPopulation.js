@@ -4,7 +4,7 @@ const {
     O_EXPAND_POPULATION,
     T_SPAWN
 } = require('constants');
-const Spawn = require('tasks.actor.Spawn');
+const SpawnTask = require('tasks.actor.Spawn');
 
 
 /**
@@ -64,7 +64,7 @@ class ExpandPopulation extends BaseObjective {
 
             if (nbMissing == 0) {
                 for (var i = 0; i < nbMissing; i++) {
-                    spawnActor.scheduleTask(new Spawn({params: {profile}}));
+                    spawnActor.scheduleTask(new SpawnTask({params: {profile}}));
                 }
             }
         });

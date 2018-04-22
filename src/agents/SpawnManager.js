@@ -16,7 +16,7 @@ class SpawnManager extends BaseManager {
      * @param {Array} - ids of creeps this manager can control
      */
     initialize(spawn, creepActorIds=[]) {
-        super(
+        super.initialize(
             `SpawnManager ${spawn.name}`,
             AT_SPAWN_MANAGER, creepActorIds, {}, {
                 spawn: spawn.id

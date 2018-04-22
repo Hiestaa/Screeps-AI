@@ -74,12 +74,13 @@ class BaseTask extends BaseObjective {
      */
     _finished(agent) {
         if (this._agentTypeError) { return true; }
-        return this._finished(agent);
+        return this.finished(agent);
     }
 
     dump() {
-        const data = super();
+        const data = super.dump();
         data.priority = this.priority;
+        return data;
     }
 }
 

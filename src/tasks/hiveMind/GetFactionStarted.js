@@ -1,9 +1,9 @@
-const BaseTask = require('task.BaseTask');
+const BaseTask = require('tasks.BaseTask');
 const {
     T_GET_FACTION_STARTED,
     AT_HIVE_MIND
 } = require('constants');
-const InitializeColony = require('task.colony.InitializeColony');
+const InitializeColony = require('tasks.colony.InitializeColony');
 
 /**
  * The GetFactionStarted task simply makes schedule the `InitializeColony` task.

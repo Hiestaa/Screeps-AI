@@ -18,7 +18,7 @@ class Colony extends BaseAgent {
     initialize(spawn) {
         const spawnActor = new SpawnActor();
         spawnActor.initialize(spawn);
-        super(`Colony ${spawn.name}`, AT_COLONY, {
+        super.initialize(`Colony ${spawn.name}`, AT_COLONY, {
             spawnActor: spawnActor.id
         });
 

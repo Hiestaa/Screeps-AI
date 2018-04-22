@@ -4,7 +4,7 @@ const {
     AT_COLONY,
     CP_WORKER
 } = require('constants');
-const InitializeRoom = require('tasks.architect.InitializeRoom');
+const InitializeRoom = require('objectives.architect.InitializeRoom');
 const ExpandPopulation = require('objectives.actor.ExpandPopulation');
 const {
     CREEP_PER_MINING_SPOT
@@ -32,9 +32,12 @@ class InitializeColony extends BaseTask {
             profiles.push(CP_WORKER);
         }
 
+        console.log(
+            '[DEBUG][INITIALIZE COLONY] Defining spawn actor objective ExtendPopulation(profiles=' +
+            JSON.stringify(profiles) + ')');
         colony.agent('spawnActor').setObjective(
             new ExpandPopulation({params: profiles}));
-        architect.scheduleTask(new InitializeRoom());
+        architect.setObjective(new InitializeRoom());
     }
 }
 

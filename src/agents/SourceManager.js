@@ -15,7 +15,7 @@ class SourceManager extends BaseManager {
      *                be managed by this agent
      */
     initialize(source, creepActorIds=[]) {
-        super(`SourceManager ${source.id}`,
+        super.initialize(`SourceManager ${source.id}`,
             AT_SOURCE_MANAGER, creepActorIds, {}, {
                 source: source.id
             }
@@ -23,9 +23,9 @@ class SourceManager extends BaseManager {
         this.nbMiningSpots = 0;
     }
 
-    load(state) { super(state); this.nbMiningSpots = state.nbMiningSpots; }
+    load(state) { super.load(state); this.nbMiningSpots = state.nbMiningSpots; }
 
-    save(state) { super(state); state.nbMiningSpots = this.nbMiningSpots; }
+    save(state) { super.save(state); state.nbMiningSpots = this.nbMiningSpots; }
 
     /**
      * Get the number of mining spots on the attached source.
@@ -36,15 +36,17 @@ class SourceManager extends BaseManager {
      */
     getNbMiningSpots() {
         if (this.nbMiningSpots) { return this.nbMiningSpots; }
-        this.nbMiningSpots = this.source.room.lookAtArea(
-            this.source.pos.y - 1, this.source.pos.x - 1,
-            this.source.pos.y + 1, this.source.pos.x + 1, true
+        const source = this.object('source');
+        this.nbMiningSpots = source.room.lookAtArea(
+            source.pos.y - 1, source.pos.x - 1,
+            source.pos.y + 1, source.pos.x + 1, true
         ).filter((lookObj) => {
             return (
                 lookObj.type === 'terrain' &&
                 lookObj[lookObj.type] !== 'wall'
             );
         }).length;
+        return this.nbMiningSpots;
     }
 }
 

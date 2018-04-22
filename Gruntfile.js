@@ -55,7 +55,7 @@ module.exports = function (grunt) {
                     filter: 'isFile',
                     rename: function (dest, src) {
                         // Change the path name utilize underscores for folders
-                        return dest + src.replace(/\//g,'.');
+                        return dest + src.replace(/\//g,'.').replace(/.index.js/g, '.js');
                     }
                 }],
             }
@@ -84,7 +84,7 @@ module.exports = function (grunt) {
             versioning: {
                 files: [
                     {
-                        append: '\nglobal.SCRIPT_VERSION = '+ currentdate.getTime() + '\n',
+                        append: '\nmodule.exports.SCRIPT_VERSION = '+ currentdate.getTime() + '\n',
                         input: 'dist/version.js',
                     }
                 ]
