@@ -3,6 +3,7 @@ const {
     A_HARVEST,
     CP_WORKER
 } = require('constants');
+const logger = require('log').getLogger('tasks.creepActions.Harvest', '#FEBF00');
 
 /**
  * The harvest action proceeds as follow:
@@ -41,7 +42,7 @@ class Harvest extends BaseCreepAction {
             }
         }
         else {
-            console.log('[ERROR][HARVEST] Creep is Full. Task is should be finished.');
+            logger.error('Creep is Full. Task should be finished.');
         }
     }
 

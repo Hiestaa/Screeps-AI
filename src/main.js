@@ -1,18 +1,19 @@
 require('cli');
 const run = require('agents.AgentsManager.run');
+const logger = require('log').getLogger('main', 'white');
 
 const {
     SCRIPT_VERSION
 } = require('version');
 if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
     Memory.SCRIPT_VERSION = SCRIPT_VERSION;
-    console.log('New code uplodated');
+    logger.info('New code uplodated');
 }
 
 module.exports.loop = function () {
-    console.log('--------------------------------------------------------------');
-    console.log('[MAIN] Tick begins.');
+    logger.debug('--------------------------------------------------------------');
+    logger.debug('[MAIN] Tick begins.');
     run();
-    console.log('[MAIN] Tick ends.');
-    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+    logger.debug('[MAIN] Tick ends.');
+    logger.debug('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 };

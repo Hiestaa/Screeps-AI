@@ -32,9 +32,6 @@ class InitializeColony extends BaseTask {
             profiles.push(CP_WORKER);
         }
 
-        console.log(
-            '[DEBUG][INITIALIZE COLONY] Defining spawn actor objective ExtendPopulation(profiles=' +
-            JSON.stringify(profiles) + ')');
         colony.agent('spawnActor').setObjective(
             new ExpandPopulation({params: profiles}));
         architect.setObjective(new InitializeRoom());

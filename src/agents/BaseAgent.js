@@ -5,6 +5,7 @@ const {
 const tasks = require('tasks');
 const objectives = require('objectives');
 const genId = require('utils.id');
+const logger = require('log').getLogger('agents.BaseAgent', '#42D700');
 
 /**
  * An agent is a long lived object in the AI brain, all attributes are saved in Memory after
@@ -63,7 +64,7 @@ class BaseAgent {
      * @param {Object} attachedGameObjectIds - mapping between strings keys and game object ids.
      */
     initialize(name, type, attachedAgentIds, attachedGameObjectIds) {
-        console.log(`[DEBUG][BASE AGENT][INITIALIZE] type=${type} name=${name}`);
+        logger.info(`Initialize (type=${type} name=${name})`);
         this.name = name;
         this.type = type;
         this.attachedAgentIds = attachedAgentIds || {};
@@ -112,7 +113,7 @@ class BaseAgent {
      * @param {Object} memory - pointer over a Memory location in which the agent state can be found
      */
     load(memory) {
-        // console.log(`[DEBUG][BASE AGENT][LOAD] name=${this.name} type=${this.type}`);
+        logger.debug(`Load (name=${this.name} type=${this.type})`);
         this.name = memory.name;
         this.type = memory.type;
 
@@ -146,12 +147,12 @@ class BaseAgent {
      */
     run() {
         if (!this.currentTask && !this.currentObjective && this._tasksList.length == 0) {
-            console.log(`[DEBUG][BASE AGENT][RUN] Idle (name=${this.name} type=${this.type})`);
+            logger.info(`Run Idle (name=${this.name} type=${this.type})`);
             return;
         }
-        console.log(`[DEBUG][BASE AGENT][RUN] name=${this.name} type=${this.type}`);
+        logger.info(`Run (name=${this.name} type=${this.type})`);
         if (this.currentTask) {
-            console.log(`[DEBUG][BASE AGENT][RUN] > Executing Task ${this.currentTask.type} params=${JSON.stringify(this.currentTask.params)} state=${JSON.stringify(this.currentTask.state)}`);
+            logger.debug(`Run > Executing Task ${this.currentTask.type} params=${JSON.stringify(this.currentTask.params)} state=${JSON.stringify(this.currentTask.state)}`);
             this.currentTask._execute(this);
             if (this.currentTask._finished(this)) {
                 this.currentTask = null;
@@ -159,7 +160,7 @@ class BaseAgent {
         }
 
         if (this.currentObjective) {
-            console.log(`[DEBUG][BASE AGENT][RUN] > Executing Objective ${this.currentObjective.type} params=${JSON.stringify(this.currentObjective.params)} state=${JSON.stringify(this.currentObjective.state)}`);
+            logger.debug(`Run > Executing Objective ${this.currentObjective.type} params=${JSON.stringify(this.currentObjective.params)} state=${JSON.stringify(this.currentObjective.state)}`);
             this.currentObjective._execute(this);
         }
 
@@ -169,10 +170,10 @@ class BaseAgent {
             this._tasksList.sort((t1, t2) => t1.priority - t2.priority);
             // pop the last item of the list as the  current task
             this.currentTask = this._tasksList.pop();
-            console.log(`[DEBUG][BASE AGENT][RUN] > Next task: ${this.currentTask.type}`);
+            logger.debug(`Run > Next task: ${this.currentTask.type}`);
         }
 
-        console.log(`[DEBUG][BASE AGENT][RUN FINISHED] name=${this.name} type=${this.type}`);
+        logger.debug(`Run finished (name=${this.name} type=${this.type})`);
     }
 
     /*
@@ -180,7 +181,7 @@ class BaseAgent {
      * @param {Object} memory - the memory location at which to store the agent state
      */
     save(memory) {
-        // console.log(`[DEBUG][BASE AGENT][SAVE] name=${this.name} type=${this.type}`);
+        logger.debug(`Save (name=${this.name} type=${this.type})`);
         memory.id = this.id;
         memory.name = this.name;
         memory.type = this.type;
@@ -234,7 +235,7 @@ class BaseAgent {
      * @param {BaseTask} task - the task to be executed
      */
     scheduleTask(task) {
-        console.log(`[DEBUG][BASE AGENT][SCHEDULE TASK] type=${task.type} params=${JSON.stringify(task.params)} state=${JSON.stringify(task.state)}`);
+        logger.debug(`Schedule task (type=${task.type} params=${JSON.stringify(task.params)} state=${JSON.stringify(task.state)})`);
         if (this.currentTask === null) {
             this.currentTask = task;
         }
@@ -248,7 +249,7 @@ class BaseAgent {
      * @param {BaseObjective} objective - the objective to be executed
      */
     setObjective(objective) {
-        console.log(`[DEBUG][BASE AGENT][SET OBJECTIVE] type=${objective.type} params=${JSON.stringify(objective.params)} state=${JSON.stringify(objective.state)}`);
+        logger.debug(`Set objective (type=${objective.type} params=${JSON.stringify(objective.params)} state=${JSON.stringify(objective.state)})`);
         this.currentObjective = objective;
     }
 

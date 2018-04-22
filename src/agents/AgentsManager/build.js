@@ -5,6 +5,7 @@ const CreepActor = require('agents.CreepActor');
 const {
     getAgentById
 } = require('agents.AgentsManager.storage');
+const logger = require('log').getLogger('agents.AgentsManager.build', '#FC00FF');
 
 /**
  * When creating an agent that is associated with an update of the game state,
@@ -36,7 +37,7 @@ exports.buildPendingCreepActor = (spawn, profile, architectId) => {
     const creepName = profile.getCreepName();
     const code = spawn.spawnCreep(profile.bodyParts, creepName);
     if (code !== OK) {
-        console.log('[ERROR][AGENT MANAGER STORAGE] Unable to build creep actor ' + creepName);
+        logger.error('Unable to build creep actor ' + creepName);
         return code;
     }
 
@@ -68,9 +69,8 @@ exports.verifyPendingAgents = () => {
             agent.handleNewAgent(agent);
         }
         else {
-            console.log(
-                '[ERROR][AGENT MANAGER STORAGE] Dont\'t know ' +
-                'what to do with pending agent type: ', type);
+            logger.error(
+                'Dont\'t know what to do with pending agent type: ' + type);
         }
     });
 

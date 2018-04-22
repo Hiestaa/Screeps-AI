@@ -17,6 +17,7 @@ const {
 const HiveMind = require('agents.HiveMind');
 const GetFactionStarted = require('tasks.hiveMind.GetFactionStarted');
 const agentClasses = require('agents');
+const logger = require('log').getLogger('agents.AgentsManager.run', '#FC00FF');
 
 Memory.pause = Memory.pause || false;
 
@@ -29,8 +30,7 @@ Memory.pause = Memory.pause || false;
  */
 module.exports = () => {
     if (Memory.pause) {
-        console.log(
-            '[AGENTS MANAGER][RUN] Paused. Run `cli.resume()` to resume.');
+        logger.info('Run Paused. Run `cli.resume()` to resume.');
         return;
     }
     // first recreate all the agents. We can't trust that the previous tick

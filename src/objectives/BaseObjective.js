@@ -1,3 +1,4 @@
+const logger = require('log').getLogger('objectives.BaseObjective', '#FFF000');
 
 /**
  * Coordination of various agents is made throught tasks and objectives.
@@ -38,15 +39,13 @@ class BaseObjective {
      *                 already been started.
      */
     constructor(type, applicableAgentType, {params, state}) {
-        console.log(`[DEBUG][BASE OBJECTIVE][CONSTRUCTOR] type=${type} params=${JSON.stringify(params)} state=${JSON.stringify(state)}`);
+        logger.debug(`Constructing (type=${type} params=${JSON.stringify(params)} state=${JSON.stringify(state)})`);
         this.type = type;
         this.applicableAgentType = applicableAgentType;
         this._agentTypeError = false;
         this.params = params || {};
         this.state = state || {};
     }
-
-    _log(msg) { console.log(`[BASE OBJECTIVE]${msg}`); }
 
     execute() {
         throw new Error(`Not Implemented - ${this.type}.execute`);
@@ -62,8 +61,8 @@ class BaseObjective {
     _execute(agent) {
         if (this._agentTypeError) { return; }
         if (agent.type !== this.applicableAgentType) {
-            this._log(`[EXECUTE] Unapplicable agent type [type=${this.type}, ` +
-                      `type=${agent.type}, applicable=${this.applicableAgentType}`);
+            logger.error(`Unapplicable agent type (type=${this.type}, ` +
+                         `type=${agent.type}, applicable=${this.applicableAgentType})`);
             this._agentTypeError = true;
             return;
         }

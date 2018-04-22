@@ -2,6 +2,7 @@ const BaseAgent = require('agents.BaseAgent');
 const {
     AT_CREEP_ACTOR
 } = require('constants');
+const logger = require('log').getLogger('agents.BaseManager', '#00FF8A');
 
 /**
  * The Manager is instanciated on request of an architect and is an abstraction
@@ -57,7 +58,7 @@ class BaseManager extends BaseAgent {
             this.totalCreepActors += 1;
         }
         else {
-            console.log('[ERROR][BASE MANAGER] Don\' know what to do with new agent of type', agent.type);
+            logger.error('Don\'t know what to do with new agent of type', agent.type);
         }
     }
 

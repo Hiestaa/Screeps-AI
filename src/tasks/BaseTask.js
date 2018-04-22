@@ -46,8 +46,6 @@ class BaseTask extends BaseObjective {
         this.priority = priority || 1.0;
     }
 
-    _log(msg) { console.log(`[BASE TASK]${msg}`); }
-
     /**
      * Make the agent execute the task, if it has the applicable type.
      * @param {Agent} agent - the agent that should execute this task.
