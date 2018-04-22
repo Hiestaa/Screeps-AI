@@ -64,7 +64,7 @@ class BaseAgent {
      * @param {Object} attachedGameObjectIds - mapping between strings keys and game object ids.
      */
     initialize(name, type, attachedAgentIds, attachedGameObjectIds) {
-        logger.info(`Initialize (type=${type} name=${name})`);
+        logger.info(`Initialize (type=${type} name=${name} attachedAgentIds=${JSON.stringify(attachedAgentIds)} attachedGameObjectIds=${JSON.stringify(attachedGameObjectIds)})`);
         this.name = name;
         this.type = type;
         this.attachedAgentIds = attachedAgentIds || {};

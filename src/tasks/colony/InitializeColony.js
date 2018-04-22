@@ -9,6 +9,7 @@ const ExpandPopulation = require('objectives.actor.ExpandPopulation');
 const {
     CREEP_PER_MINING_SPOT
 } = require('settings');
+const logger = require('log').getLogger('tasks.colony.InitializeColony', '#B0CA34');
 
 /**
  * This task will compute the number of creeps needed to initialize the
@@ -32,8 +33,10 @@ class InitializeColony extends BaseTask {
             profiles.push(CP_WORKER);
         }
 
+        logger.debug('Constructing ExpandPopulation objective with profiles: ' +
+                     profiles.join(', '));
         colony.agent('spawnActor').setObjective(
-            new ExpandPopulation({params: profiles}));
+            new ExpandPopulation({params: {profiles}}));
         architect.setObjective(new InitializeRoom());
     }
 }

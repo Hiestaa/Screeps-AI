@@ -3,6 +3,7 @@ const SourceManager = require('agents.SourceManager');
 const SpawnManager = require('agents.SpawnManager');
 // const BuildingManager = require('agents.BuildingManager');
 const ControllerManager = require('agents.ControllerManager');
+const logger = require('log').getLogger('agents.Architect', '#0E9800');
 
 const {
     AT_ARCHITECT
@@ -29,6 +30,7 @@ class Architect extends BaseAgent {
         // they are added to this array so the architect can assign them
         // to whatever group is relevant depending on the task executed
         this.unassignedCreepActorIds = [];
+        this.nbMiningSpots = null;
 
         const sources = room.find(FIND_SOURCES);
         sources.forEach((source, idx) => {
@@ -58,12 +60,14 @@ class Architect extends BaseAgent {
     save(state) {
         super.save(state);
         state.unassignedCreepActorIds = this.unassignedCreepActorIds;
+        state.nbMiningSpots = this.nbMiningSpots;
     }
 
     load(state) {
         super.load(state);
         // restore the assigned creep actor from saved id
         this.unassignedCreepActorIds = state.unassignedCreepActorIds;
+        this.nbMiningSpots = state.nbMiningSpots;
     }
 
     /**
@@ -92,11 +96,18 @@ class Architect extends BaseAgent {
      * @return {Integer} the number of mining spots
      */
     countMiningSpots() {
-        return _.sum(
+        const room = this.object('room');
+        if (this.nbMiningSpots !== null) {
+            logger.debug(`Architect (room=${room}) has ${this.nbMiningSpots} mining spots.`);
+            return this.nbMiningSpots;
+        }
+        this.nbMiningSpots = _.sum(
             Object.keys(this.attachedAgents)
                 .filter(k => k.startsWith('source_'))
                 .map(k => this.agent(k))
                 .map(s => s.getNbMiningSpots()));
+        logger.debug(`Architect (room=${room}) has ${this.nbMiningSpots} mining spots.`);
+        return this.nbMiningSpots;
     }
 }
 

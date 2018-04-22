@@ -2,6 +2,7 @@ const BaseManager = require('agents.BaseManager');
 const {
     AT_SOURCE_MANAGER
 } = require('constants');
+const logger = require('log').getLogger('agents.SourceManager', '#CCFF00');
 
 /**
  * The SourceManager is instanciated on request of an architect and deals with
@@ -46,6 +47,7 @@ class SourceManager extends BaseManager {
                 lookObj[lookObj.type] !== 'wall'
             );
         }).length;
+        logger.debug(`SourceManager (sourceId=${source.id}) has ${this.nbMiningSpots} mining spots.`);
         return this.nbMiningSpots;
     }
 }

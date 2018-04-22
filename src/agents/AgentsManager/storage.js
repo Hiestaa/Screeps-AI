@@ -88,7 +88,7 @@ exports.getAgentState = (agentId) => {
 exports.getOrCreateAgentState = (agent) => {
     let memory = Memory;
     Memory.agentsList[agent.id] = agent.memoryLocation();
-    logger.info(`Get/create state (agentId=${agent.id}, memLoc=${Memory.agentsList[agent.id]})`);
+    logger.debug(`Get/create state (agentId=${agent.id}, memLoc=${Memory.agentsList[agent.id]})`);
     const memLoc = Memory.agentsList[agent.id].split('.');
     for (var i = 0; i < memLoc.length; i++) {
         if (!memory[memLoc[i]]) { memory[memLoc[i]] = {}; }

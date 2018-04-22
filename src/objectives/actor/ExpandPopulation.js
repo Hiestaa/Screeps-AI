@@ -5,7 +5,7 @@ const {
     T_SPAWN
 } = require('constants');
 const SpawnTask = require('tasks.actor.Spawn');
-
+const logger = require('log').getLogger('objectives.actor.ExpandPopulation', '#006DDC');
 
 /**
  * The ExpandPopulation schedules as many tasks as necessary on the spawn actor to
@@ -17,9 +17,10 @@ const SpawnTask = require('tasks.actor.Spawn');
  */
 class ExpandPopulation extends BaseObjective {
     constructor({state, params: {profiles}, priority}={}) {
+        logger.debug(`Constructor received profiles: ${JSON.stringify(profiles)}`);
         super(O_EXPAND_POPULATION, AT_SPAWN_ACTOR, {
             state,
-            params: {profiles},
+            params: {profiles: profiles || []},
             priority
         });
     }

@@ -27,7 +27,7 @@ const loggers = {__store: true};
 Memory.loggers = Memory.loggers || {};
 
 const LEVEL_STYLES = {
-    debug: 'font-size: 10px',
+    debug: 'font-size: 11px',
     info: 'font-size: 14px',
     warning: 'font-size: 16px; style: italic',
     error: 'font-size: 18px; font-weight: bold',
@@ -304,10 +304,15 @@ exports.disableLevel = (level) => {
     levelLogger._disable(level);
 };
 
-/* Used to test persistent memory*/
-exports.__clearLoggers = () => {
-    Object.keys(loggers).forEach(k => {
-        delete loggers[k];
+exports.listLoggers = () => {
+    console.log('[INFO][LOG] Currently enabled loggers:');
+    Object.keys(Memory.loggers).forEach(k => {
+        const logger = Memory.loggers[k];
+        const color = logger.color || '#CBCBCB';
+        const style = logger.color ? 'font-size: 14px' : 'font-size: 10px';
+        console.log(
+            `<font style="${style}; color: ${color}" ` +
+            `color="${logger.color}" severity="3">` +
+            `                ${k}</font>`);
     });
-    levelLogger = new LevelLogger();
 };

@@ -1,4 +1,4 @@
-const logger = require('log').getLogger('objectives.BaseObjective', '#FFF000');
+const logger = require('log').getLogger('objectives.BaseObjective', '#00D2E5');
 
 /**
  * Coordination of various agents is made throught tasks and objectives.
@@ -66,6 +66,7 @@ class BaseObjective {
             this._agentTypeError = true;
             return;
         }
+        logger.debug(`Executing (type=${this.type}, params=${JSON.stringify(this.params)}, state=${JSON.stringify(this.state)})`);
         this.execute(agent);
     }
 

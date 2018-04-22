@@ -8,6 +8,11 @@ const {
  * It does not manage any agent in itself
  */
 class SpawnActor extends BaseAgent {
+    constructor(id) {
+        super(id);
+        this.nbSpawnedByProfile = {};
+        this.profilesSpawned = {};
+    }
     /**
      * Initialize this spawn actor
      * @param {StructureSpawn} spawn - the spawn this actor should be related to
