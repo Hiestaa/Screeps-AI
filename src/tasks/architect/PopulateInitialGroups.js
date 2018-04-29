@@ -4,10 +4,15 @@ const {
 } = require('agents.AgentsManager.storage');
 const {
     T_POPULATE_INITIAL_GROUPS,
-    AT_ARCHITECT
+    AT_ARCHITECT,
+    CP_WORKER,
+    CP_HEALER,
+    CP_FIGHTER,
+    CP_RANGED_FIGHTER
 } = require('constants');
 
 // more than one because at this point there is no dedicated hauler (there might never be)
+// TODO: make this relative to the distance to the spawn?
 const CREEP_PER_MINING_SPOT = 1.5;
 
 // 100% of the creep capacity for this room should be dedicated to filling up the spawn
@@ -34,15 +39,24 @@ const CREEP_PER_MINING_SPOT = 1.5;
  * able to harvest from a source at the same time.
  */
 class PopulateInitialGroups extends BaseTask {
-    constructor({state, params: {creepActorIds}}={}) {
-        super(T_POPULATE_INITIAL_GROUPS, AT_ARCHITECT, {state, params: {creepActorIds}});
+    constructor({state, params: {creepActorIds}, priority}={}) {
+        super(T_POPULATE_INITIAL_GROUPS, AT_ARCHITECT, {state, params: {creepActorIds}, priority});
     }
 
     execute(architect) {
         const creepActors = this.params.creepActorIds.map(id => getAgentById(id));
 
         // copy the array - we'll distribute one of each of these to the sources of this room
-        const creepActorsForSources = Array.from(creepActors);
+        const creepActorsForFight = Array.from(creepActors)
+            .filter(ca => [
+                CP_HEALER,
+                CP_FIGHTER,
+                CP_RANGED_FIGHTER
+            ].indexOf(ca.creepProfile) >= 0);
+        const creepActorsForSpawn = Array.from(creepActors)
+            .filter(ca => ca.creepProfile === CP_WORKER);
+        const creepActorsForSources = Array.from(creepActorsForSpawn);
+
         // for each source manager, assign as many new agent as there is empty spots
         const sourceManagers = architect.getSourceManagers().map(sm => {
             const nbMiningSpots = sm.getNbMiningSpots();
@@ -62,13 +76,18 @@ class PopulateInitialGroups extends BaseTask {
 
         // now distribute all creeps to the spawner
         // this will be improved shortly
-        creepActors.forEach(creepActor => {
-            this.agent('spawn').handleNewAgent(creepActor);
+        creepActorsForSpawn.forEach(creepActor => {
+            architect.agent('spawn').handleNewAgent(creepActor);
         });
 
-        // at this point, the creep actors should each be assigne to a worker group
+        // at this point, the creep actors should each be assigned to a worker group
         // and a harvest group. If these have the proper objetive assigned,
         // the creeps should start receiving tasks!
+
+        creepActorsForFight.forEach(creepActor => {
+            const defenseGroup = architect.agent('defenseGroup');
+            defenseGroup.handleNewAgent(creepActor);
+        });
     }
 }
 

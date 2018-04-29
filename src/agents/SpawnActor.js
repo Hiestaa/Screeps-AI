@@ -12,6 +12,8 @@ class SpawnActor extends BaseAgent {
         super(id);
         this.nbSpawnedByProfile = {};
         this.profilesSpawned = {};
+        // set at each tick, we don't need to remember across ticks
+        this.usedEnergyDuringTick = 0;
     }
     /**
      * Initialize this spawn actor
@@ -27,6 +29,8 @@ class SpawnActor extends BaseAgent {
         this.profilesSpawned = {};
 
         // profile -> number of creeps alive of that profile (spawned by this actor)
+        // this should be populated by the T_SPAWN task as well but will be reloaded
+        // after each tick anyway.
         this.nbSpawnedByProfile = {};
     }
 
@@ -36,12 +40,31 @@ class SpawnActor extends BaseAgent {
         // some creeps may be dead - delete them
         Object.keys(this.profilesSpawned).forEach(k => {
             const profile = this.profilesSpawned[k];
-            if (!Game.creeps[k]) { delete this.profilesSpawned[k]; }
+            if (!Game.creeps[k]) {
+                delete this.profilesSpawned[k];
+            }
             else {
                 this.nbSpawnedByProfile[profile] = (
-                    this.nbSpawnedByProfile[profile] || 0) + 1;
+                    this.nbSpawnedByProfile[profile] || 1) + 1;
             }
         });
+    }
+
+    /*
+     * `energy` and `spawnCreep` are wrapper around the game object methods
+     * to allow updating the actual energy capacity within the same tick.
+     */
+
+    energy() {
+        return this.object('spawn').energy - this.usedEnergyDuringTick;
+    }
+
+    spawnCreep(bodyParts, creepName, cost) {
+        const code = this.object('spawn').spawnCreep(bodyParts, creepName);
+        if (code === OK) {
+            this.usedEnergyDuringTick += cost;
+        }
+        return code;
     }
 
     save(state) {

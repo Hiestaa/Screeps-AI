@@ -34,8 +34,8 @@ class BaseCreepAction extends BaseTask {
      * @param {Object} [memory.state] - the state of this objective, if the objective has
      *                 already been started.
      */
-    constructor(profiles, type, {priority, state, params}) {
-        super(type, AT_CREEP_ACTOR, {priority, state, params});
+    constructor(profiles, type, memory) {
+        super(type, AT_CREEP_ACTOR, memory);
 
         this.profiles = profiles;
     }

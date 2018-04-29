@@ -12,15 +12,15 @@ const FillUp = require('tasks.manager.FillUp');
  * instructing them to haul the energy they carry back to the spawn.
  */
 class StayFilledUp extends BaseObjective {
-    constructor({state, params, priority}={}) {
-        super(O_STAY_FILLED_UP, AT_SPAWN_MANAGER, {state, params, priority});
+    constructor(memory={}) {
+        super(O_STAY_FILLED_UP, AT_SPAWN_MANAGER, memory);
     }
 
     execute(spawnManager) {
         const spawn = spawnManager.object('spawn');
         if (spawn.energy < spawn.energyCapacity) {
-            if (spawnManager.hasTaskScheduled(T_FILLUP)) {
-                spawnManager.scheduleTask(new FillUp(/*...*/));
+            if (!spawnManager.hasTaskScheduled(T_FILLUP)) {
+                spawnManager.scheduleTask(new FillUp());
             }
         }
     }

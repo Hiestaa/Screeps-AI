@@ -24,7 +24,7 @@ Object.keys(Game.spawns).forEach(spawnName => {
             //     lookObj[lookObj.type].pos.x +
             //     lookObj[lookObj.type].pos.y);
             return (
-                lookObj.type === 'terrain' &&
+                lookObj.type === LOOK_TERRAIN &&
                 lookObj[lookObj.type] !== 'wall'
             );
         }).length;

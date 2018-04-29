@@ -7,13 +7,19 @@ const {
 } = require('version');
 if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
     Memory.SCRIPT_VERSION = SCRIPT_VERSION;
-    logger.info('New code uplodated');
+    logger.info('New code uploaded');
 }
 
 module.exports.loop = function () {
     logger.debug('--------------------------------------------------------------');
     logger.debug('[MAIN] Tick begins.');
-    run();
+    try {
+        run();
+    }
+    catch (e) {
+        logger.fatal(`Interrupted tick: ${e.message}\n${e.stack}`);
+        debugger;  // eslint-disable-line no-debugger
+    }
     logger.debug('[MAIN] Tick ends.');
     logger.debug('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 };

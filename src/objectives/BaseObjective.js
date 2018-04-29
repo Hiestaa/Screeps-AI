@@ -33,18 +33,22 @@ class BaseObjective {
      *                This MUST be DEFINED by a sub-class
      * @param {Object} memory - stored memory, or provided bootstrap memory
      *                 this MUST be provided when INSTANCIATING or RELOADING the objective.
+     *                 this MUST be passed up to the parent contstructor if overriding the class
      * @param {Object} [memory.params] - parameters for this objective, beware that
-                       some objectives might have some required parameters
+     *                 some objectives might have some required parameters
      * @param {Object} [memory.state] - the state of this objective, if the objective has
      *                 already been started.
+     * @param {Object} [options] - additional options the sub-classes may set.
+     * @param {Integer} [options.frequency=0] - number of ticks to wait before re-running
+     *                  execution function to save cpu. Disabled by default.
      */
-    constructor(type, applicableAgentType, {params, state}) {
-        logger.debug(`Constructing (type=${type} params=${JSON.stringify(params)} state=${JSON.stringify(state)})`);
+    constructor(type, applicableAgentType, {params, state}, {frequency}={}) {
         this.type = type;
         this.applicableAgentType = applicableAgentType;
         this._agentTypeError = false;
         this.params = params || {};
         this.state = state || {};
+        this.frequency = frequency;
     }
 
     execute() {
@@ -66,8 +70,16 @@ class BaseObjective {
             this._agentTypeError = true;
             return;
         }
+        if (this.frequency > 0 &&
+            this.state._nextRun &&
+            Game.time < this.state._nextRun) {
+            return;
+        }
         logger.debug(`Executing (type=${this.type}, params=${JSON.stringify(this.params)}, state=${JSON.stringify(this.state)})`);
         this.execute(agent);
+        if (this.frequency) {
+            this.state._nextRun = Game.time + this.frequency;
+        }
     }
 
     /**
@@ -86,6 +98,13 @@ class BaseObjective {
         };
     }
 
+    shortDescription() {
+        return this.type;
+    }
+
+    longDescription() {
+        return this.type;
+    }
 }
 
 module.exports = BaseObjective;

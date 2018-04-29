@@ -37,7 +37,7 @@ class Haul extends BaseCreepAction {
         const creep = creepActor.object('creep');
         const target = Game.getObjectById(this.params.targetId);
         if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+            creep.moveTo(target, {visualizePathStyle: {stroke: '#FFEA00'}});
         }
     }
 
@@ -49,6 +49,9 @@ class Haul extends BaseCreepAction {
         return creepActor.object('creep').carry.energy == 0;
     }
 
+    shortDescription() {
+        return '👜';
+    }
 }
 
 module.exports = Haul;

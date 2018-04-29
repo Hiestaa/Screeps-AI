@@ -1,7 +1,9 @@
 // This module is decoupled from the storage part, so that agent classes can refer
 // to the `storage` part of the agent manager without creating a circular dependency
 // with the `run` part which depends on the agent classes to run them.
-
+const {
+    AT_CREEP_ACTOR
+} = require('constants');
 const {
     getAgentsList,
     setAgentsList,
@@ -9,17 +11,61 @@ const {
     getAgentState,
     getOrCreateAgentState,
     getExistingAgentIds,
-    addAgent
+    addAgent,
+    getAgentById
 } = require('agents.AgentsManager.storage');
 const {
-    verifyPendingAgents
+    forEachPendingAgents
 } = require('agents.AgentsManager.build');
 const HiveMind = require('agents.HiveMind');
 const GetFactionStarted = require('tasks.hiveMind.GetFactionStarted');
 const agentClasses = require('agents');
+const CreepActor = require('agents.CreepActor');
 const logger = require('log').getLogger('agents.AgentsManager.run', '#FC00FF');
 
 Memory.pause = Memory.pause || false;
+
+/**
+ * Verify if any of the pending new agent is ready for creation.
+ * If so, build the agent and add it to the agents list,
+ * retrieve the agent that should handle the creation, call into its
+ * `handleNewAgent` function, then remove the agent from the pending new agents.
+ */
+function verifyPendingAgents() {
+    forEachPendingAgents(({type, id, handlerId, profile}) => {
+        if (type === AT_CREEP_ACTOR) {
+            // creeps are id'ed by name in this array
+            const creep = Game.creeps[id];
+            if (!creep) { return false; }   // creep doesn't exist yet
+            // creep isn't alive yet
+            if (!(creep.hits > 0 && creep.ticksToLive > 0)) { return false; }
+
+            const agent = getAgentById(handlerId);
+            if (!agent) {
+                logger.error(`Couldn't find pending agent handler ${handlerId}`);
+                return true;
+            }
+
+            const creepActor = new CreepActor();
+            creepActor.initialize(creep, profile);
+            // TF??
+            if (!creepActor.isAlive()) {
+                logger.error(`Creep ${creepActor.name} is dead on birth`);
+                removeAgent(creepActor);
+                return false;
+            }
+
+            logger.info(`Assigning new creep actor ${creepActor.name} to agent ${agent.name}`);
+            agent.handleNewAgent(creepActor);
+            return true;
+        }
+        else {
+            logger.error(
+                'Dont\'t know what to do with pending agent type: ' + type);
+            return true;  // don't error at each call...
+        }
+    });
+}
 
 /**
  * Run for one tick.
@@ -83,18 +129,15 @@ module.exports = () => {
     getAgentsList().forEach((agent) => {
         // if the agent isn't alive, this means the agent should be destroyed
         if (!agent.isAlive()) {
-            removeAgent(agent.id);
+            removeAgent(agent);
         }
     });
 
     // then run the agent execution function, one at a time.
-    // TODO: since execution of the agent can lead to the creation of other agent,
-    // and the `forEach` function will ignore any item added after it is called,
-    // we could speed up some processes by making the storage `addAgent`
-    // (would be better named `buildAgent` or smth) save that in a separate list,
-    // which we could process during the current tick.
-    // Beware then to not include agent creation associated with an update of
-    // the game state, since these will only exist one or several ticks later on.
+    // TODO: the agent's execution function may not terminate the list of actions
+    // the agent is allowed to perform. We should find a way to keep running the
+    // agents until it is blocked by a game action, or it doesn't know what to do
+    // anymore.
     getAgentsList().forEach(agent => {
         agent.run();
     });

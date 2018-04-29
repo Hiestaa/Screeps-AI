@@ -55,8 +55,10 @@ class BaseProfile {
             bodyParts.push(baseBodyParts[i]);
         }
 
+        this.bodyParts = bodyParts;
         this.cost =  _.sum(bodyParts.map(p => BODYPART_COST[p]));
         this.name = name;
+        this.fullName = null;  // only generated if `getCreepName()` is called
         this.toughness = toughness;
         this.efficiency = efficiency;
         this.mainBodyPart = mainBodyPart;
@@ -65,10 +67,12 @@ class BaseProfile {
 
     /**
      * Generates a unique name for this creep
-     * @return {string}
+     * @return {string} - the (same) unique name generated for this instance on each call
      */
     getCreepName() {
-        return `${this.name}#${counter(this.name)}`;
+        if (this.fullName !== null) { return this.fullName; }
+        this.fullName = `${this.name}#${counter(this.name)}`;
+        return this.fullName;
     }
 }
 

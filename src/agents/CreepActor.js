@@ -1,7 +1,8 @@
 const BaseAgent = require('agents.BaseAgent');
 const {
-    AT_CREEP_AGENT
+    AT_CREEP_ACTOR
 } = require('constants');
+const logger = require('log').getLogger('agents.CreepActor', '#8AFF00');
 
 /**
  * The creep actor is created to control the behavior of a creep.
@@ -23,7 +24,7 @@ class CreepActor extends BaseAgent {
      */
     initialize(creep, creepProfile) {
         this.creepProfile = creepProfile;
-        super.initialize(`CreepActor ${creep.name}`, AT_CREEP_AGENT, {}, {
+        super.initialize(`CreepActor ${creep.name}`, AT_CREEP_ACTOR, {}, {
             creep: creep.name
         });
     }
@@ -37,8 +38,11 @@ class CreepActor extends BaseAgent {
     // However the unique name used as id will enable the agent to load
     // the creep object off of `Game.creeps[name]` instead of `Game.getObjectById()`
     findGameObject(key, val) {
-        if (key === 'creep') { return Game.creeps[val]; }
-        return Game.getObjectById(val);
+        const res = (key === 'creep') ? Game.creeps[val] : Game.getObjectById(val);
+        if (!res) {
+            logger.warning(`Unable to find game object ${key}: ${val}`);
+        }
+        return res;
     }
     /**
      * The state of the creep actor agent is stored in the
@@ -63,13 +67,36 @@ class CreepActor extends BaseAgent {
     save(state) { super.save(state); state.creepProfile = this. creepProfile; }
 
     isAlive() {
+        const creep = this.object('creep');
         return (
-            this.attachedGameObjects.creep &&
-            this.attachedGameObjects.creep.hits > 0 &&
-            this.attachedGameObjects.creep.ticksToLive > 0
+            creep && creep.hits > 0 && creep.ticksToLive > 0
         );
     }
 
+    notifyNewTask(task) {
+        super.notifyNewTask(task);
+        this.object('creep').say(task.shortDescription());
+    }
+
+    notifyTaskScheduled(task) {
+        super.notifyTaskScheduled(task);
+        this.object('creep').say('S:' + task.shortDescription());
+    }
+
+    notifyTaskFinished(task) {
+        super.notifyTaskFinished(task);
+        this.object('creep').say('D:' + task.shortDescription());
+    }
+
+    scheduleTask(action) {
+        if (action.profiles && !action.profiles.has(this.creepProfile)) {
+            logger.warning(
+                `Scheduling invalid action ${action.type} (valid profiles: ${action.profiles.join(', ')}) ` +
+                `to creep actor ${this.name} of profile: ${this.creepProfile}`);
+            debugger;  // eslint-disable-line no-debugger
+        }
+        super.scheduleTask(action);
+    }
 }
 
 

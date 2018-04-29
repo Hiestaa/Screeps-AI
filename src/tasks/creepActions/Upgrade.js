@@ -50,6 +50,9 @@ class Upgrade extends BaseCreepAction {
         return creep.carry.energy == 0;
     }
 
+    shortDescription() {
+        return '⬆️';
+    }
 }
 
 module.exports = Upgrade;

@@ -1,6 +1,6 @@
 // FUNCTIONS RELATED TO THE MANAGEMENT OF AGENT INSTANCES (in module memory)
 
-const logger = require('log').getLogger('agents.AgentsManager.build', '#FC00FF');
+const logger = require('log').getLogger('agents.AgentsManager.storage', '#FC00FF');
 
 let agents = [];
 const agentsById = {};
@@ -8,6 +8,16 @@ const agentsById = {};
 // (saves running over the entire list of agents when deleting one)
 // (this doesn't need to be remembered accross ticks)
 let deletedAgents = {};
+// saves which agents are deleted, for the purpose of the checks by
+// the `run` function of the agents when making sure dependeng agents are
+// alive.
+const allDeletedAgents = new Set();
+
+exports.hasAgentBeenDeleted = (agentId) => {
+    return allDeletedAgents.has(agentId);
+};
+
+exports.hasAnyAgentBeenDeleted = () => allDeletedAgents.size > 0;
 
 /**
  * Returns the stored list of agents,
@@ -28,13 +38,12 @@ exports.getAgentsList = () => {
  * This will loop over the entire list to index the agents by id.
  */
 exports.setAgentsList = (agentsList) => {
-    logger.debug('Set agents list');
     agents = agentsList;
-    agents.forEach(a => { agents[a.id] = a; });
+    agents.forEach(a => { agentsById[a.id] = a; });
 };
 
 exports.addAgent = (agent) => {
-    logger.debug(`Add agent (name=${agent.name}, type=${agent.type})`);
+    logger.info(`Add agent (name=${agent.name}, type=${agent.type})`);
     agents.push(agent);
     agentsById[agent.id] = agent;
 };
@@ -47,10 +56,12 @@ exports.addAgent = (agent) => {
  * @param {BaseAgent} agent - the agent to remove
  */
 exports.removeAgent = (agent) => {
-    logger.debug(`Remove agent (name=${agent.name}, type=${agent.type})`);
+    logger.info(`Remove agent (name=${agent.name}, type=${agent.type})`);
     delete agentsById[agent.id];
     deletedAgents[agent.id] = true;
+    allDeletedAgents.add(agent.id);
     deleteAgentState(agent.id);
+    // TODO: clear up or notify other agents of the deletion?
 };
 
 exports.getAgentById = (agentId) => {
@@ -58,9 +69,12 @@ exports.getAgentById = (agentId) => {
 };
 
 // FUNCTIONS RELATED TO THE MANAGEMENT OF AGENTS PERSISTENT MEMORY
-Memory.agents = Memory.agents || {};  // default location for agents state
+
+// default location for agents state, MAY NOT REF TO HOLD ALL AGENTS
+Memory.agents = Memory.agents || {};
 // maps agent ids to the location where their state can be found.
-Memory.agentsList = Memory.agentsList || {};
+// THIS WILL HOLD A REF TO ALL EXISTING AGENTS
+Memory.agentsMemoryLoc = Memory.agentsMemoryLoc || {};
 
 /**
  * Returns a pointer over the agent state in memory, if there is one.
@@ -70,7 +84,7 @@ Memory.agentsList = Memory.agentsList || {};
  *         been deleted from storage
  */
 exports.getAgentState = (agentId) => {
-    const memLoc = Memory.agentsList[agentId].split('.');
+    const memLoc = Memory.agentsMemoryLoc[agentId].split('.');
     let memory = Memory;
     for (var i = 0; i < memLoc.length; i++) {
         if (!memory[memLoc[i]]) { return memory; }
@@ -87,11 +101,13 @@ exports.getAgentState = (agentId) => {
  */
 exports.getOrCreateAgentState = (agent) => {
     let memory = Memory;
-    Memory.agentsList[agent.id] = agent.memoryLocation();
-    logger.debug(`Get/create state (agentId=${agent.id}, memLoc=${Memory.agentsList[agent.id]})`);
-    const memLoc = Memory.agentsList[agent.id].split('.');
+    Memory.agentsMemoryLoc[agent.id] = agent.memoryLocation();
+    const memLoc = Memory.agentsMemoryLoc[agent.id].split('.');
     for (var i = 0; i < memLoc.length; i++) {
-        if (!memory[memLoc[i]]) { memory[memLoc[i]] = {}; }
+        if (!memory[memLoc[i]]) {
+            logger.debug(`Create state (agentId=${agent.id}, memLoc=${Memory.agentsMemoryLoc[agent.id]})`);
+            memory[memLoc[i]] = {};
+        }
         memory = memory[memLoc[i]];
     }
     return memory;
@@ -101,11 +117,11 @@ exports.getOrCreateAgentState = (agent) => {
  * Get rid of any trace of the agent's memory.
  */
 const deleteAgentState = (agentId) => {
-    if (Memory.agentsList[agentId]) {
-        logger.info(`Delete state (agentId=${agentId}, memLoc=${Memory.agentsList[agentId]})`);
-        const memLoc = Memory.agentsList[agentId].split('.');
+    if (Memory.agentsMemoryLoc[agentId]) {
+        logger.info(`Delete state (agentId=${agentId}, memLoc=${Memory.agentsMemoryLoc[agentId]})`);
+        const memLoc = Memory.agentsMemoryLoc[agentId].split('.');
         let memory = Memory;
-        delete Memory.agentsList[agentId];
+        delete Memory.agentsMemoryLoc[agentId];
 
         for (var i = 0; i < memLoc.length - 1; i++) {
             memory = memory[memLoc[i]];
@@ -124,7 +140,7 @@ const deleteAgentState = (agentId) => {
  * not hold all ids since some agents can change the memory location
  */
 exports.getExistingAgentIds = () => {
-    return Object.keys(Memory.agentsList);
+    return Object.keys(Memory.agentsMemoryLoc);
 };
 
 /**
@@ -135,7 +151,7 @@ exports.getExistingAgentIds = () => {
  */
 exports.clearStorage = () => {
     Memory.agents = {};
-    Memory.agentsList = {};
+    Memory.agentsMemoryLoc = {};
     agents = [];
     Object.keys(agentsById).forEach(k => { delete agentsById[k]; });
     deletedAgents = {};

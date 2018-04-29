@@ -30,6 +30,7 @@ class Harvest extends BaseCreepAction {
             state,
             priority
         });
+        this.amountHarvested = 0;
     }
 
     execute(creepActor) {
@@ -39,6 +40,10 @@ class Harvest extends BaseCreepAction {
             var source = Game.getObjectById(this.params.sourceId);
             if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+            }
+            else {
+                // TODO: This should depends on the number of WORK body parts
+                this.amountHarvested += 2;
             }
         }
         else {
@@ -52,7 +57,11 @@ class Harvest extends BaseCreepAction {
      */
     finished(creepActor) {
         const creep = creepActor.object('creep');
-        return creep.carry.energy > creep.carryCapacity - 2;
+        return creep.carry.energy + this.amountHarvested > creep.carryCapacity - 2;
+    }
+
+    shortDescription() {
+        return '⛏️';
     }
 
 }

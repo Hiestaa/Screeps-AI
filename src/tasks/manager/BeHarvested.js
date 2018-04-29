@@ -2,7 +2,7 @@ const BaseTask = require('tasks.BaseTask');
 const {
     AT_SOURCE_MANAGER,
     T_BE_HARVESTED,
-    AT_CREEP_AGENT,
+    AT_CREEP_ACTOR,
     A_HARVEST
 } = require('constants');
 const Harvest = require('tasks.creepActions.Harvest');
@@ -19,8 +19,10 @@ class BeHarvested extends BaseTask {
      * @param {Object} memory - stored memory, or provided bootstrap memory
      * @param {Float} [memory.priority] - priority for this task
      */
-    constructor({priority}={}) {
-        super(T_BE_HARVESTED, AT_SOURCE_MANAGER, {priority});
+    constructor(memory={}) {
+        super(T_BE_HARVESTED, AT_SOURCE_MANAGER, memory, {
+            frequency: 5
+        });
     }
 
     execute(agent) {
@@ -28,23 +30,25 @@ class BeHarvested extends BaseTask {
             const creepActor = agent.attachedAgents[key];
 
             if (key === 'source') { return; }
-            if (creepActor.type !== AT_CREEP_AGENT) { return; }
+            if (creepActor.type !== AT_CREEP_ACTOR) { return; }
 
             if (creepActor.hasTaskScheduled(A_HARVEST)) { return; }
 
             creepActor.scheduleTask(
                 new Harvest({
-                    params: {sourceId: agent.attachedAgents.source.id}
+                    params: {sourceId: agent.object('source').id}
                 })
             );
         });
     }
 
     /**
-     * The task is finished as soon as it is executed. This is a one-shot action.
+     * The task is finished when the energy is depleted.
+     * The 'DistributeEnergy' objective will reschedule the task when the source
+     * is replenishes.
      */
-    finished() {
-        return true;
+    finished(agent) {
+        return agent.object('source').energy <= 0;
     }
 
 }

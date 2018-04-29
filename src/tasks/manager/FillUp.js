@@ -2,7 +2,7 @@ const BaseTask = require('tasks.BaseTask');
 const {
     AT_SPAWN_MANAGER,
     T_FILLUP,
-    AT_CREEP_AGENT,
+    AT_CREEP_ACTOR,
     A_HAUL
 } = require('constants');
 const Haul = require('tasks.creepActions.Haul');
@@ -13,8 +13,10 @@ const Haul = require('tasks.creepActions.Haul');
  * execute a A_HARVEST action on the source managed by this actor.
  */
 class FillUp extends BaseTask {
-    constructor({priority, params, state}={}) {
-        super(T_FILLUP, AT_SPAWN_MANAGER, {priority, params, state});
+    constructor(memory={}) {
+        super(T_FILLUP, AT_SPAWN_MANAGER, memory, {
+            frequency: 5
+        });
     }
 
     execute(spawnManager) {
@@ -22,13 +24,13 @@ class FillUp extends BaseTask {
             const creepActor = spawnManager.attachedAgents[key];
 
             if (key === 'source') { return; }
-            if (creepActor.type !== AT_CREEP_AGENT) { return; }
+            if (creepActor.type !== AT_CREEP_ACTOR) { return; }
 
             if (creepActor.hasTaskScheduled(A_HAUL)) { return; }
 
             creepActor.scheduleTask(
                 new Haul({
-                    params: {targetId: spawnManager.agent('spawn').id}
+                    params: {targetId: spawnManager.object('spawn').id}
                 })
             );
         });

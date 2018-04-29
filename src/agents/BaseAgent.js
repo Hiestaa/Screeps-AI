@@ -1,6 +1,8 @@
 const {
     getAgentById,
-    addAgent
+    addAgent,
+    hasAgentBeenDeleted,
+    hasAnyAgentBeenDeleted
 } = require('agents.AgentsManager.storage');
 const tasks = require('tasks');
 const objectives = require('objectives');
@@ -113,7 +115,7 @@ class BaseAgent {
      * @param {Object} memory - pointer over a Memory location in which the agent state can be found
      */
     load(memory) {
-        logger.debug(`Load (name=${this.name} type=${this.type})`);
+        logger.debug(`Load (name=${memory.name} type=${memory.type})`);
         this.name = memory.name;
         this.type = memory.type;
 
@@ -134,27 +136,76 @@ class BaseAgent {
         if (memory.currentTask) {
             this.currentTask = new tasks[memory.currentTask.type](memory.currentTask);
         }
+        else {
+            this.currentTask = null;
+        }
         if (memory.currentObjective) {
             this.currentObjective = new objectives[memory.currentObjective.type](memory.currentObjective);
         }
+        else {
+            this.currentObjective = null;
+        }
+
+        this._tasksList = [];
         memory._tasksList.forEach(task => {
             this._tasksList.push(new tasks[task.type](task));
         });
     }
 
     /**
-     * Run the action, task and
+     * Called  upon deletion of an attached agent, detected at the beginning of the
+     * run function.
+     */
+    notifyDeletedAgent(agent, key) {
+        logger.info(`${this.name} noticed death of attached ${key}: ${agent.name}`);
+    }
+
+    /**
+     * Called upon starting the execution of a new task.
+     */
+    notifyNewTask(task) {
+        logger.debug(`Run > Next task: ${task.type}`);
+    }
+
+    notifyTaskFinished(task) {
+        logger.info(
+            `[${this.name}] Task execution finished (type=` +
+            `${task.type} params=${JSON.stringify(task.params)} ` +
+            `state=${JSON.stringify(task.state)}`);
+
+    }
+
+    /**
+     * Run the current task, the current objective, and pop the next task
+     * from the task list if the current task is finished.
      */
     run() {
         if (!this.currentTask && !this.currentObjective && this._tasksList.length == 0) {
-            logger.info(`Run Idle (name=${this.name} type=${this.type})`);
+            logger.debug(`Run Idle (name=${this.name} type=${this.type})`);
             return;
         }
-        logger.info(`Run (name=${this.name} type=${this.type})`);
+
+        if (hasAnyAgentBeenDeleted()) {
+            // check that we don't have any attached agent deleted in the current tick
+            // TODO: better yet would be to link all agents both ways, so we know the
+            // list of agents a given agent is attached to and can clean that up
+            // upon removal directly.
+            Object.keys(this.attachedAgentIds).forEach(k => {
+                const id = this.attachedAgentIds[k];
+                if (hasAgentBeenDeleted(id)) {
+                    this.notifyDeletedAgent(this.attachedAgents[k], k);
+                    delete this.attachedAgentIds[k];
+                    delete this.attachedAgents[k];
+                }
+            });
+        }
+
+        logger.debug(`Run (name=${this.name} type=${this.type})`);
         if (this.currentTask) {
             logger.debug(`Run > Executing Task ${this.currentTask.type} params=${JSON.stringify(this.currentTask.params)} state=${JSON.stringify(this.currentTask.state)}`);
             this.currentTask._execute(this);
             if (this.currentTask._finished(this)) {
+                this.notifyTaskFinished(this.currentTask);
                 this.currentTask = null;
             }
         }
@@ -166,11 +217,13 @@ class BaseAgent {
 
         // pick next task if the current one is done executing
         if (!this.currentTask && this._tasksList && this._tasksList.length > 0) {
-            // sort in ascending priority
-            this._tasksList.sort((t1, t2) => t1.priority - t2.priority);
-            // pop the last item of the list as the  current task
-            this.currentTask = this._tasksList.pop();
-            logger.debug(`Run > Next task: ${this.currentTask.type}`);
+            // sort in descrending priority
+            this._tasksList.sort((t2, t1) => t2.priority - t1.priority);
+            // grab the first item of the list as the current task (highest priority)
+            // if all tasks have the same priority, in-place sorting should leave the
+            // first item that was pushed to the list come out.
+            this.currentTask = this._tasksList.shift();
+            this.notifyNewTask(this.currentTask);
         }
 
         logger.debug(`Run finished (name=${this.name} type=${this.type})`);
@@ -219,13 +272,51 @@ class BaseAgent {
     /**
      * Ask the agent whether it is executing a task of the given type
      * or such task is currently scheduled for execution
+     * If no task type is specified, this returns whether the agent currently
+     * has *any* task scheduled.
+     * @param {CONST} taskType - specific type of the task to look for
+     * @param {Object} options
+     * @param {Function} filter - a filter function to apply to task instances,
+     *                   this function will ignore any task for which this function returns false.
      * @return {Boolean} - true if the task is found
      */
-    hasTaskScheduled(taskType) {
+    hasTaskScheduled(taskType, {filter}={}) {
         return (
-            (this.currentTask && this.currentTask.type === taskType) ||
-            (_.some(this._tasksList.find(t => t.type === taskType)))
+            (
+                this.currentTask &&
+                (!taskType || this.currentTask.type === taskType) &&
+                (!filter || filter(this.currentTask))
+            ) ||
+            (
+                _.some(this._tasksList.find(
+                    t => t.type === taskType && (!filter || filter(t))))
+            )
         );
+    }
+
+    /**
+     * Ask the agent the number of task it currently has scheduled
+     * This include the task the agent is currently executing
+     * @param {String} taskType - filter the type of task.
+     * @return {Integer} - the number of scheduled and executing tasks, or
+     *                   the number of tasks of the given type.
+     */
+    nbTasksScheduled(taskType) {
+        let allTasks = Array.from(this._tasksList);
+        if (this.currentTask) {
+            allTasks = allTasks.concat([this.currentTask]);
+        }
+        if (taskType) {
+            allTasks = allTasks.filter(t => t.type === taskType);
+        }
+        return allTasks.length;
+    }
+
+    notifyTaskScheduled(task) {
+        logger.info(
+            `[${this.name}] schedule task (type=${task.type} params=` +
+            `${JSON.stringify(task.params)} state=${JSON.stringify(task.state)})`);
+
     }
 
     /**
@@ -235,7 +326,13 @@ class BaseAgent {
      * @param {BaseTask} task - the task to be executed
      */
     scheduleTask(task) {
-        logger.debug(`Schedule task (type=${task.type} params=${JSON.stringify(task.params)} state=${JSON.stringify(task.state)})`);
+        if (task.applicableAgentType !== this.type) {
+            logger.warning(
+                `Scheduling task with non-applicable agent type ${task.applicableAgentType} ` +
+                `to agent ${this.name} of type: ${this.type}`);
+            debugger;  // eslint-disable-line no-debugger
+        }
+        this.notifyTaskScheduled(task);
         if (this.currentTask === null) {
             this.currentTask = task;
         }
@@ -249,8 +346,23 @@ class BaseAgent {
      * @param {BaseObjective} objective - the objective to be executed
      */
     setObjective(objective) {
-        logger.debug(`Set objective (type=${objective.type} params=${JSON.stringify(objective.params)} state=${JSON.stringify(objective.state)})`);
+        logger.info(
+            `[${this.name}] Set objective (type=${objective.type} params=` +
+            `${JSON.stringify(objective.params)} state=${JSON.stringify(objective.state)})`);
         this.currentObjective = objective;
+    }
+
+    /**
+     * Check whether the agent has the given objective.
+     * @param {String} objectiveType - the type of the objective to check
+     * @return {Boolean} - if `objectiveType` is specified, this will only return
+     *                     true if the given type of objective is currently active.
+     *                    Otherwise, it returns true if *any* objective is active
+     */
+    hasObjective(objectiveType) {
+        return this.currentObjective && (
+            objectiveType === undefined ||
+            objectiveType === this.currentObjective);
     }
 
     /**

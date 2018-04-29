@@ -1,13 +1,13 @@
 const BaseProfile = require('creepsProfiles.BaseProfile');
 const {
-    CP_WORKER,
+    CP_RANGED_FIGHTER,
     CP_SLOW
 } = require('constants');
 
 /**
- * Profile dedicated to work-related operations.
+ * Profile dedicated to fight from a distance
  */
-class WorkerProfile extends BaseProfile {
+class RangedFighterProfile extends BaseProfile {
     /**
      * Initialize the worker profile.
      * @param {Integer} toughness - number of TOUGH body parts
@@ -15,10 +15,10 @@ class WorkerProfile extends BaseProfile {
      * @param {CONST} toughness - speed level
      */
     constructor(toughness, efficiency, speed) {
-        super(CP_WORKER, WORK, [
-            WORK, CARRY
+        super(CP_RANGED_FIGHTER, RANGED_ATTACK, [
+            RANGED_ATTACK
         ], toughness || 0, efficiency || 0, speed || CP_SLOW);
     }
 }
 
-module.exports = WorkerProfile;
+module.exports = RangedFighterProfile;

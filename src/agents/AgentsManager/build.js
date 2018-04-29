@@ -1,10 +1,6 @@
 const {
     AT_CREEP_ACTOR
 } = require('constants');
-const CreepActor = require('agents.CreepActor');
-const {
-    getAgentById
-} = require('agents.AgentsManager.storage');
 const logger = require('log').getLogger('agents.AgentsManager.build', '#FC00FF');
 
 /**
@@ -33,48 +29,42 @@ Memory.pendingNewAgents = Memory.pendingNewAgents || [];
  * @param {String} architectId - id of the architect that will be in charge of the creep.
  * @return {Integer} - code returned by `spawnCreep`
  */
-exports.buildPendingCreepActor = (spawn, profile, architectId) => {
+exports.buildPendingCreepActor = (spawnActor, profile, architectId) => {
     const creepName = profile.getCreepName();
-    const code = spawn.spawnCreep(profile.bodyParts, creepName);
+    const code = spawnActor.spawnCreep(profile.bodyParts, creepName, profile.cost);
     if (code !== OK) {
-        logger.error('Unable to build creep actor ' + creepName);
+        logger.failure(code, 'Unable to build creep actor ' + creepName);
         return code;
     }
 
     Memory.pendingNewAgents.push({
         type: AT_CREEP_ACTOR,
         id: creepName,
-        handlerId: architectId
+        handlerId: architectId,
+        profile: profile.name
     });
 
     return code;
 };
 
 /**
- * Verify if any of the pending new agent is ready for creation.
- * If so, build the agent and add it to the agents list,
- * retrieve the agent that should handle the creation, call into its
- * `handleNewAgent` function, then remove the agent from the pending new agents.
+ * Execute a function for each pending new agent.
+ * If the function returns `true`, the agent creation is assumed successfull,
+ * and the object will be removed from the list of pending new agents.
+ * @param {Function} fn - the function to execute for each pending new agent.
+ *                        it should expect a single parameter as an object with the structure:
+ *                        `{type, id, handlerId, profile}`
  */
-exports.verifyPendingAgents = () => {
+exports.forEachPendingAgents = (fn) => {
     const created = [];
-    Memory.pendingNewAgents.forEach(({type, id, handlerId}) => {
-        if (type === AT_CREEP_ACTOR) {
-            // creeps are id'ed by name in this array
-            const creep = Game.creeps[id];
-            if (!creep) { return; }
-            const creepActor = new CreepActor();
-            creepActor.initialize(creep);
-            const agent = getAgentById(handlerId);
-            agent.handleNewAgent(agent);
-        }
-        else {
-            logger.error(
-                'Dont\'t know what to do with pending agent type: ' + type);
+    Memory.pendingNewAgents.forEach(({type, id, handlerId, profile}, idx) => {
+        if (fn({type, id, handlerId, profile})) {
+            created.push(idx);
         }
     });
 
-    created.forEach(idx => {
-        Memory.pendingNewAgents.splice(idx, 1);
+    // remove all created pending new agents
+    Memory.pendingNewAgents = Memory.pendingNewAgents.filter((itm, idx) => {
+        return created.indexOf(idx) === -1;
     });
 };

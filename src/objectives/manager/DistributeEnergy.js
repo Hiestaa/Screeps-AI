@@ -1,28 +1,24 @@
 const BaseObjective = require('objectives.BaseObjective');
 const {
     AT_SOURCE_MANAGER,
-    O_DISTRIBUTE_ENERGY
+    O_DISTRIBUTE_ENERGY,
+    T_BE_HARVESTED
 } = require('constants');
 const BeHarvested = require('tasks.manager.BeHarvested');
-
-// The BeHarvested task will incurr a significant loop over all agents
-// Avoid doing that too often, since a harvest task in itself takes a
-// while to be executed, and may not be executed as soon as it is scheduled.
-const RESCHEDULE_DELAY = 20;
 
 /**
  * The DistributeEnergy objective simply re-schedule periodically
  * the T_BE_HARVESTED  task on the source manager that executes it.
  */
 class DistributeEnergy extends BaseObjective {
-    constructor({state}={}) {
-        super(O_DISTRIBUTE_ENERGY, AT_SOURCE_MANAGER, {state});
+    constructor(memory={}) {
+        super(O_DISTRIBUTE_ENERGY, AT_SOURCE_MANAGER, memory, {
+            frequency: 5
+        });
     }
 
     execute(agent) {
-        if (Game.time < this.state.waitUntil) { return; }
-
-        this.state.waitUntil = Game.time + RESCHEDULE_DELAY;
+        if (agent.hasTaskScheduled(T_BE_HARVESTED)) { return; }
 
         agent.scheduleTask(new BeHarvested());
     }

@@ -16,12 +16,21 @@ const logger = require('log').getLogger('objectives.actor.ExpandPopulation', '#0
  * to replace the current one.
  */
 class ExpandPopulation extends BaseObjective {
-    constructor({state, params: {profiles}, priority}={}) {
-        logger.debug(`Constructor received profiles: ${JSON.stringify(profiles)}`);
+    /**
+     * Build a new ExpandPopulation objective.
+     * @param {Object} data - objective instance data
+     * @param {Object} data.params - parameter for this objective instance
+     * @param {Array<CONST>} data.params.profiles - the creep profiles to spawn
+     * @param {ObjectId} data.params.handlerId - id of the agent that will handle the creep
+     *                   actor that will be created (the architect of the room in
+     *                   which the creep actor will spawn)
+     * @param {integer} [data.priority] - priority of this task
+     * @param {Object} [data.state] - state of the task (used for reloading)
+     */
+    constructor({state, params: {profiles, handlerId}}={}) {
         super(O_EXPAND_POPULATION, AT_SPAWN_ACTOR, {
             state,
-            params: {profiles: profiles || []},
-            priority
+            params: {profiles: profiles || [], handlerId}
         });
     }
 
@@ -45,6 +54,7 @@ class ExpandPopulation extends BaseObjective {
             });
         }
 
+        const handlerId = this.params.handlerId;
         // count the number of creeps pending for creation for each profile
         const pendingPerProfile = {};
         spawnActor._tasksList.forEach(t => {
@@ -62,10 +72,10 @@ class ExpandPopulation extends BaseObjective {
                 (spawnActor.nbSpawnedByProfile[profile] || 0) -
                 (pendingPerProfile[profile] || 0)
             );
-
-            if (nbMissing == 0) {
+            if (nbMissing > 0) {
+                logger.debug(`Missing ${nbMissing} creeps profile ${profile}`);
                 for (var i = 0; i < nbMissing; i++) {
-                    spawnActor.scheduleTask(new SpawnTask({params: {profile}}));
+                    spawnActor.scheduleTask(new SpawnTask({params: {profile, handlerId: handlerId}}));
                 }
             }
         });

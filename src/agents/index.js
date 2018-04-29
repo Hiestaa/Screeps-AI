@@ -9,6 +9,7 @@ const {
     AT_SPAWN_MANAGER,
     AT_SOURCE_MANAGER,
     AT_BUILDING_MANAGER,
+    AT_FIGHTER_GROUP,
     // AT_ACTOR,
     AT_CREEP_ACTOR,
     AT_SPAWN_ACTOR,
@@ -24,8 +25,8 @@ module.exports = {
     [AT_SPAWN_MANAGER]: require('agents.SpawnManager'),
     [AT_SOURCE_MANAGER]: require('agents.SourceManager'),
     [AT_BUILDING_MANAGER]: require('agents.BuildingManager'),
+    [AT_FIGHTER_GROUP]: require('agents.FighterGroup'),
     [AT_CREEP_ACTOR]: require('agents.CreepActor'),
     [AT_SPAWN_ACTOR]: require('agents.SpawnActor'),
-    [AT_TOWER_ACTOR]: require('agents.TowerActor'),
+    [AT_TOWER_ACTOR]: require('agents.TowerActor')
 };
-

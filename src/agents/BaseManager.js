@@ -52,6 +52,7 @@ class BaseManager extends BaseAgent {
 
     handleNewAgent(agent) {
         if (agent.type === AT_CREEP_ACTOR) {
+            logger.info(`Manager ${this.name} is handling new creep actor with profile: ${agent.creepProfile}`);
             this.attachedAgents[`creep_${this.totalCreepActors}`] = agent;
             this.attachedAgentIds[`creep_${this.totalCreepActors}`] = agent.id;
             this.nbCreepActors += 1;

@@ -3,6 +3,7 @@ const SourceManager = require('agents.SourceManager');
 const SpawnManager = require('agents.SpawnManager');
 // const BuildingManager = require('agents.BuildingManager');
 const ControllerManager = require('agents.ControllerManager');
+const FighterGroup = require('agents.FighterGroup');
 const logger = require('log').getLogger('agents.Architect', '#0E9800');
 
 const {
@@ -24,7 +25,7 @@ class Architect extends BaseAgent {
     initialize(room) {
         super.initialize(
             `Architect ${room.name}`, AT_ARCHITECT,
-            {}, {room: room.id});
+            {}, {room: room.name});
 
         // when creeps appear in the room without assigned to a manager,
         // they are added to this array so the architect can assign them
@@ -41,12 +42,12 @@ class Architect extends BaseAgent {
 
         const structures = room.find(FIND_STRUCTURES);
         structures.forEach(structure => {
-            if (structure.type === STRUCTURE_SPAWN) {
+            if (structure.structureType === STRUCTURE_SPAWN) {
                 const spawn = new SpawnManager();
                 spawn.initialize(structure);
                 this.attachAgent('spawn', spawn);
             }
-            else if (structure.tye === STRUCTURE_CONTROLLER) {
+            else if (structure.structureType === STRUCTURE_CONTROLLER) {
                 const controller = new ControllerManager();
                 controller.initialize(structure);
                 this.attachAgent('controller', controller);
@@ -55,6 +56,17 @@ class Architect extends BaseAgent {
 
         // many BuildingManager will be attached to this agent as deemed
         // necessary by the executed tasks, these don't exist yet at the initialization phase.
+
+        const defenseGroup = new FighterGroup();
+        defenseGroup.initialize(room, `DefenseGroup R${room.name}`);
+        this.attachAgent('defenseGroup', defenseGroup);
+    }
+
+    findGameObject(key, val) {
+        if (key === 'room') {
+            return Game.rooms[val];
+        }
+        return Game.getObjectById(val);
     }
 
     save(state) {
@@ -102,10 +114,7 @@ class Architect extends BaseAgent {
             return this.nbMiningSpots;
         }
         this.nbMiningSpots = _.sum(
-            Object.keys(this.attachedAgents)
-                .filter(k => k.startsWith('source_'))
-                .map(k => this.agent(k))
-                .map(s => s.getNbMiningSpots()));
+            this.getSourceManagers().map(s => s.getNbMiningSpots()));
         logger.debug(`Architect (room=${room}) has ${this.nbMiningSpots} mining spots.`);
         return this.nbMiningSpots;
     }

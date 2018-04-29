@@ -10,8 +10,8 @@ const InitializeColony = require('tasks.colony.InitializeColony');
  * on the attached colony
  */
 class GetFactionStarted extends BaseTask {
-    constructor({state, priority}={}) {
-        super(T_GET_FACTION_STARTED, AT_HIVE_MIND, {state, priority});
+    constructor(memory={}) {
+        super(T_GET_FACTION_STARTED, AT_HIVE_MIND, memory);
     }
 
     execute(agent) {

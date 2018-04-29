@@ -16,7 +16,7 @@ class SourceManager extends BaseManager {
      *                be managed by this agent
      */
     initialize(source, creepActorIds=[]) {
-        super.initialize(`SourceManager ${source.id}`,
+        super.initialize(`SourceManager R${source.room.name}-${source.id.toString().slice(0, 2)}`,
             AT_SOURCE_MANAGER, creepActorIds, {}, {
                 source: source.id
             }
@@ -43,7 +43,7 @@ class SourceManager extends BaseManager {
             source.pos.y + 1, source.pos.x + 1, true
         ).filter((lookObj) => {
             return (
-                lookObj.type === 'terrain' &&
+                lookObj.type === LOOK_TERRAIN &&
                 lookObj[lookObj.type] !== 'wall'
             );
         }).length;

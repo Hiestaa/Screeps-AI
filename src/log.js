@@ -45,12 +45,12 @@ const LEVEL_SEVERITY = {
 };
 
 const ERRORS = [
+    'OK',
     'ERR_NOT_OWNER',
     'ERR_NO_PATH',
     'ERR_NAME_EXISTS',
     'ERR_BUSY',
     'ERR_NOT_FOUND',
-    'ERR_NOT_ENOUGH_ENERGY',
     'ERR_NOT_ENOUGH_RESOURCES',
     'ERR_INVALID_TARGET',
     'ERR_FULL',
@@ -64,8 +64,9 @@ const ERRORS = [
 ];
 
 const CODE_TO_ERROR = {};
+exports.codeToError = code => CODE_TO_ERROR[code];
 
-ERRORS.forEach(name => CODE_TO_ERROR[global[name]] = name);
+ERRORS.forEach((name, idx) => CODE_TO_ERROR[(idx * -1)] = CODE_TO_ERROR[(idx * -1)] || name);
 
 /**
  * LevelLogger is a common object instance that manages the enabled / disabled
@@ -77,12 +78,12 @@ class LevelLogger {
     constructor() {
         Memory.levelLogger = Memory.levelLogger || {
             // default level state, if no state is defined in memory
-            'debug': false,
-            'info': true,
-            'warning': true,
-            'error': true,
-            'fatal': true,
-            'failure': true
+            debug: false,
+            info: true,
+            warning: true,
+            error: true,
+            fatal: true,
+            failure: true
         };
         Object.keys(LEVEL_STYLES).forEach(lvl => {
             if (Memory.levelLogger[lvl]) {
@@ -185,7 +186,7 @@ class Logger {
     }
 
     failure(code, message, highlight) {
-        message = `[Failure: ${CODE_TO_ERROR[code] || 'unknown'}] ${message}`;
+        message = `[Failure: ${CODE_TO_ERROR[code] || code}] ${message}`;
         this.log('failure', message, highlight);
     }
 }

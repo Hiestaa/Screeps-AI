@@ -4,8 +4,8 @@ const CONSTANTS = [
     /* Creeps profiles */
     'CP_WORKER',
     'CP_HAULER',
-    'CP_ATTACKER',
-    'CP_RANGED_ATTACKER',
+    'CP_FIGHTER',
+    'CP_RANGED_FIGHTER',
     'CP_HEALER',
     'CP_CLAIM',
     /* * Creep profiles speed levels */
@@ -24,6 +24,7 @@ const CONSTANTS = [
     'AT_SPAWN_MANAGER',  // attached to a spawn actor and creep actors
     'AT_SOURCE_MANAGER',  // attached to a source and creep actors
     'AT_BUILDING_MANAGER',  // attached to a list of building structs and creep actors
+    'AT_FIGHTER_GROUP',  // attached to creep actors
     'AT_ACTOR',  // not actually used, specify one of the types below
     'AT_CREEP_ACTOR',  // attached to a creep
     'AT_SPAWN_ACTOR',  // attached to a spawn
@@ -53,6 +54,8 @@ const CONSTANTS = [
     'O_RENEW_POPULATION',
     'O_EXPAND_POPULATION',
     'O_STAY_FILLED_UP',
+    'O_CLEAR_ROOM_THREATS',
+    'O_GARRISONS',
 
     /* Tasks */
     /* * Hive mind */
@@ -70,6 +73,9 @@ const CONSTANTS = [
     'T_DISPATCH_ORDERS',
     'T_BE_HARVESTED',
     'T_FILLUP',
+    'T_EVALUATE_THREAT_DANGEROSITY',
+    'T_ASSEMBLE_DEFENSE_GROUP',
+    'T_DESTROY_TARGET',
     /* * Actors */
     'T_STORE_ENERGY',
     'T_UPGRADE_RCL',
@@ -89,6 +95,7 @@ const CONSTANTS = [
     'A_HAUL',
     'A_MOVE',
     'A_ATTACK',
+    'A_RANGED_ATTACK',
     'A_HEAL',
     'A_SPAWN'
 ];
