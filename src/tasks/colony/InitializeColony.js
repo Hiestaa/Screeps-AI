@@ -6,10 +6,6 @@ const {
 } = require('constants');
 const InitializeRoom = require('objectives.architect.InitializeRoom');
 const ExpandPopulation = require('objectives.actor.ExpandPopulation');
-const {
-    CREEP_PER_MINING_SPOT,
-    INITIAL_ROOM_DEFENSE
-} = require('settings');
 const logger = require('log').getLogger('tasks.colony.InitializeColony', '#B0CA34');
 
 /**
@@ -25,21 +21,30 @@ class InitializeColony extends BaseTask {
 
     execute(colony) {
         const architect = colony.agent('spawnRoomArchitect');
-        const nbSpots = architect.countMiningSpots();
 
-        const nbCreeps = nbSpots * CREEP_PER_MINING_SPOT;
+        // initially only schedule one worker per source.
+        // these will be used in priority to refill the spawn, and to
+        // build construction sites.
+        // there should be an objective that will make sure to replace this
+        // ExpandPopulation objective with a broader one, including more diverse
+        // profiles, when the architect moves on to the UpgradeRCL2 objective.
+        const nbSpots = architect.getSourceManagers().length;
         let profiles = [];
-
-        for (var i = 0; i < nbCreeps; i++) {
+        for (var i = 0; i < nbSpots; i++) {
             profiles.push(CP_WORKER);
         }
 
-        profiles = profiles.concat(INITIAL_ROOM_DEFENSE);
+        // profiles = profiles.concat(INITIAL_ROOM_DEFENSE);
 
         logger.debug('Constructing ExpandPopulation objective with profiles: ' +
                      profiles.join(', '));
-        colony.agent('spawnActor').setObjective(
-            new ExpandPopulation({params: {profiles, handlerId: architect.id}}));
+        colony.agent('spawnActor').setObjective(new ExpandPopulation({
+            params: {profiles, handlerId: architect.id}}));
+
+        // const initialCreepsCount = {};
+        // profiles.forEach(cp => {
+        //     initialCreepsCount[cp] = (profiles[cp] || 0 )+ 1;
+        // });
         architect.setObjective(new InitializeRoom());
     }
 }

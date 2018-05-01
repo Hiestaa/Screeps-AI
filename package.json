@@ -33,6 +33,7 @@
     "grunt-rsync": "^2.0.1",
     "grunt-screeps": "^1.4.0",
     "load-grunt-tasks": "^3.5.2",
+    "lodash": "^4.17.5",
     "mocha": "^5.1.1",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",

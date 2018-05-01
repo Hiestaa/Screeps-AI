@@ -194,8 +194,12 @@ class BaseAgent {
                 const id = this.attachedAgentIds[k];
                 if (hasAgentBeenDeleted(id)) {
                     this.notifyDeletedAgent(this.attachedAgents[k], k);
-                    delete this.attachedAgentIds[k];
-                    delete this.attachedAgents[k];
+                    if (this.attachedAgentIds[k]) {
+                        delete this.attachedAgentIds[k];
+                    }
+                    if (this.attachedagents[k]) {
+                        delete this.attachedAgents[k];
+                    }
                 }
             });
         }
@@ -217,8 +221,8 @@ class BaseAgent {
 
         // pick next task if the current one is done executing
         if (!this.currentTask && this._tasksList && this._tasksList.length > 0) {
-            // sort in descrending priority
-            this._tasksList.sort((t2, t1) => t2.priority - t1.priority);
+            // sort in descending priority
+            this._tasksList.sort((t1, t2) => t2.priority - t1.priority);
             // grab the first item of the list as the current task (highest priority)
             // if all tasks have the same priority, in-place sorting should leave the
             // first item that was pushed to the list come out.

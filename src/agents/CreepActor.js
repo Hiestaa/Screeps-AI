@@ -74,18 +74,18 @@ class CreepActor extends BaseAgent {
     }
 
     notifyNewTask(task) {
-        super.notifyNewTask(task);
+        // super.notifyNewTask(task);
         this.object('creep').say(task.shortDescription());
     }
 
-    notifyTaskScheduled(task) {
-        super.notifyTaskScheduled(task);
-        this.object('creep').say('S:' + task.shortDescription());
+    notifyTaskScheduled(/*task*/) {
+        // super.notifyTaskScheduled(task);
+        // this.object('creep').say('S:' + task.shortDescription());
     }
 
-    notifyTaskFinished(task) {
-        super.notifyTaskFinished(task);
-        this.object('creep').say('D:' + task.shortDescription());
+    notifyTaskFinished(/*task*/) {
+        // super.notifyTaskFinished(task);
+        // this.object('creep').say('D:' + task.shortDescription());
     }
 
     scheduleTask(action) {

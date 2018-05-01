@@ -1,20 +1,19 @@
 const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
-    A_HAUL,
+    A_BUILD,
     CP_WORKER,
-    CP_HAULER
 } = require('constants');
-const logger = require('log').getLogger('tasks.creepActions.Haul', 'white');
+const logger = require('log').getLogger('tasks.creepActions.Build', 'white');
 
 /**
- * Haul energy back to the assigned deposit.
- * TODO: Make sure Haulers move out of the way if they have
+ * Build energy back to the assigned deposit.
+ * TODO: Make sure Builders move out of the way if they have
  * nowhere to deposit energy to....
  * Right now they will just stop in the middle of the way :D
  */
-class Haul extends BaseCreepAction {
+class Build extends BaseCreepAction {
     /**
-     * Create or reload a Haul action.
+     * Create or reload a Build action.
      * @param {Float} [memory.priority] - priority for this action, used by the agent to control
      *                the execution order of his action.
      *                this MUST be provided when INSTANCIATING or RELOADING the objective.
@@ -24,9 +23,9 @@ class Haul extends BaseCreepAction {
      * @param {Object} [memory.state] - the state of this objective, if the objective has
      *                 already been started.
      */
-    constructor({priority, params: {targetId}, state}) {
-        super(new Set([CP_WORKER, CP_HAULER]), A_HAUL, {
-            params: {targetId},
+    constructor({priority, params: {siteId}, state}) {
+        super(new Set([CP_WORKER]), A_BUILD, {
+            params: {siteId},
             state,
             priority
         });
@@ -35,13 +34,14 @@ class Haul extends BaseCreepAction {
     execute(creepActor) {
         super.execute(creepActor);
         const creep = creepActor.object('creep');
-        const target = Game.getObjectById(this.params.targetId);
-        const code = creep.transfer(target, RESOURCE_ENERGY);
+        const site = Game.getObjectById(this.params.siteId);
+
+        const code = creep.build(site);
         if(code == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, {visualizePathStyle: {stroke: '#FFEA00'}});
+            creep.moveTo(site, {visualizePathStyle: {stroke: '#72FF00'}});
         }
         else if (code !== OK) {
-            logger.failure(code, 'Couldn\'t transfer stored energy');
+            logger.failure(code, 'Couldn\'t build designated construction site');
             this.state.failure = true;
         }
     }
@@ -55,8 +55,8 @@ class Haul extends BaseCreepAction {
     }
 
     shortDescription() {
-        return '👜';
+        return '🚧';
     }
 }
 
-module.exports = Haul;
+module.exports = Build;

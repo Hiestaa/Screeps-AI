@@ -13,7 +13,9 @@ const {
     A_UPGRADE,
     A_HEAL,
     A_MOVE,
-    A_RANGED_ATTACK
+    A_RANGED_ATTACK,
+    A_BUILD,
+    A_REPAIR
 } = require('constants');
 
 module.exports = {
@@ -31,5 +33,7 @@ module.exports = {
     [A_UPGRADE]: require('tasks.creepActions.Upgrade'),
     [A_HEAL]: require('tasks.creepActions.Heal'),
     [A_MOVE]: require('tasks.creepActions.Move'),
-    [A_RANGED_ATTACK]: require('tasks.creepActions.RangedAttack')
+    [A_RANGED_ATTACK]: require('tasks.creepActions.RangedAttack'),
+    [A_BUILD]: require('tasks.creepActions.Build'),
+    [A_REPAIR]: require('tasks.creepActions.Repair')
 };

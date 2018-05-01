@@ -63,17 +63,10 @@ class BaseManager extends BaseAgent {
         }
     }
 
-    // FIXME: make this function actually called when deleting a creep
-    handleAgentDeath(agent) {
-        // TODO: more efficient indexing... mmmmh...
-        Object.keys(this.attachedAgents).forEach(k => {
-            if (this.attachedAgents[k].id === agent.id) {
-                delete this.attachedAgents[k];
-                delete this.attachedAgentIds[k];
-            }
-        });
-        this.nbCreepActors -= 1;
-
+    notifyDeletedAgent(agent) {
+        if (agent.type === AT_CREEP_ACTOR) {
+            this.nbCreepActors -= 1;
+        }
     }
 }
 

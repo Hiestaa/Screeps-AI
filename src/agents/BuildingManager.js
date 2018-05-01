@@ -18,22 +18,28 @@ class BuildingManager extends BaseManager {
 
     /**
      * Initialize the building manager
-     * @param {String} roomName - name of the room this building manager is
-     *                 dedicated to, for naming purposes.
+     * @param {Room} room - room object this building manager is attached to
      * @param {Array} creepActorIds - list of ids of creep actors that should
      *                be managed by this agent
      * @param {Array} constructionSiteIds - list of ids of construction sites
      *                this building manager should take care of completing and maintaining.
      */
-    initialize(roomName, creepActorIds=[], constructionSiteIds=[]) {
+    initialize(room, creepActorIds=[], constructionSiteIds=[]) {
         constructionSiteIds = constructionSiteIds || [];
         const attachedGameObjectIds = {};
         for (var i = 0; i < constructionSiteIds.length; i++) {
             attachedGameObjectIds[`constructionSite_${i}`] = constructionSiteIds[i];
         }
         super.initialize(
-            'BuildingManager', AT_BUILDING_MANAGER,
-            creepActorIds, {}, attachedGameObjectIds);
+            'BuildingManager R' + room.name, AT_BUILDING_MANAGER,
+            creepActorIds, {room: room.name}, attachedGameObjectIds);
+    }
+
+    findGameObject(key, val) {
+        if (key === 'room') {
+            return Game.rooms[val];
+        }
+        return Game.getObjectById(val);
     }
 
     load(state) { super.load(state); this.nbBuildingActors = state.nbBuildingActors; }

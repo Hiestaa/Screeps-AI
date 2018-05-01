@@ -1,32 +1,31 @@
 const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
-    A_HAUL,
+    A_REPAIR,
     CP_WORKER,
-    CP_HAULER
 } = require('constants');
-const logger = require('log').getLogger('tasks.creepActions.Haul', 'white');
+const logger = require('log').getLogger('tasks.creepActions.Repair', 'white');
 
 /**
- * Haul energy back to the assigned deposit.
- * TODO: Make sure Haulers move out of the way if they have
+ * Repair energy back to the assigned deposit.
+ * TODO: Make sure Builders move out of the way if they have
  * nowhere to deposit energy to....
  * Right now they will just stop in the middle of the way :D
  */
-class Haul extends BaseCreepAction {
+class Repair extends BaseCreepAction {
     /**
-     * Create or reload a Haul action.
+     * Create or reload a Repair action.
      * @param {Float} [memory.priority] - priority for this action, used by the agent to control
      *                the execution order of his action.
      *                this MUST be provided when INSTANCIATING or RELOADING the objective.
      * @param {Object} memory.params - parameters for this objective, beware that
                        some objectives might have some required parameters
-     * @param {ObjectId} memory.params.targetId - id of the target to which to deposit the resources
+     * @param {ObjectId} memory.params.structureId - id of the structure that needs repairing
      * @param {Object} [memory.state] - the state of this objective, if the objective has
      *                 already been started.
      */
-    constructor({priority, params: {targetId}, state}) {
-        super(new Set([CP_WORKER, CP_HAULER]), A_HAUL, {
-            params: {targetId},
+    constructor({priority, params: {structureId}, state}) {
+        super(new Set([CP_WORKER]), A_REPAIR, {
+            params: {structureId},
             state,
             priority
         });
@@ -35,13 +34,14 @@ class Haul extends BaseCreepAction {
     execute(creepActor) {
         super.execute(creepActor);
         const creep = creepActor.object('creep');
-        const target = Game.getObjectById(this.params.targetId);
-        const code = creep.transfer(target, RESOURCE_ENERGY);
+        const structure = Game.getObjectById(this.params.structureId);
+
+        const code = creep.repair(structure);
         if(code == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, {visualizePathStyle: {stroke: '#FFEA00'}});
+            creep.moveTo(structure, {visualizePathStyle: {stroke: '#72FF00'}});
         }
         else if (code !== OK) {
-            logger.failure(code, 'Couldn\'t transfer stored energy');
+            logger.failure(code, 'Couldn\'t build designated construction site');
             this.state.failure = true;
         }
     }
@@ -51,12 +51,16 @@ class Haul extends BaseCreepAction {
      * @param {CreepActor} creepActor - creep actor executing the action
      */
     finished(creepActor) {
-        return creepActor.object('creep').carry.energy == 0 || this.state.failure;
+        const structure = Game.getObjectById(this.params.structureId);
+        return (
+            creepActor.object('creep').carry.energy == 0 ||
+            this.state.failure ||
+            structure.hits === structure.hitsMax);
     }
 
     shortDescription() {
-        return '👜';
+        return '🚧';
     }
 }
 
-module.exports = Haul;
+module.exports = Repair;

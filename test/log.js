@@ -298,10 +298,10 @@ describe('log', function() {
             fb.debug('foo bar');
 
             expect(console.log).to.have.been.calledWith(
-                '<font style="font-size: 10px; color: red"' +
+                '<font style="font-size: 11px; color: red"' +
                 ' color="red" severity="1">[DEBUG][HELLO.WORLD] hello world</font>');
             expect(console.log).to.have.been.calledWith(
-                '<font style="font-size: 10px; color: blue"' +
+                '<font style="font-size: 11px; color: blue"' +
                 ' color="blue" severity="1">[DEBUG][FOO.BAR] foo bar</font>');
         });
     });

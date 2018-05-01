@@ -36,7 +36,8 @@ class BeHarvested extends BaseTask {
 
             creepActor.scheduleTask(
                 new Harvest({
-                    params: {sourceId: agent.object('source').id}
+                    params: {sourceId: agent.object('source').id},
+                    priority: 10
                 })
             );
         });

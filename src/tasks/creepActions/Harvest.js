@@ -47,7 +47,7 @@ class Harvest extends BaseCreepAction {
             }
         }
         else {
-            logger.error('Creep is Full. Task should be finished.');
+            logger.info('Creep is Full. Task should be finished.');
         }
     }
 

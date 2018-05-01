@@ -3,6 +3,7 @@ const SourceManager = require('agents.SourceManager');
 const SpawnManager = require('agents.SpawnManager');
 // const BuildingManager = require('agents.BuildingManager');
 const ControllerManager = require('agents.ControllerManager');
+const BuildingManager = require('agents.BuildingManager');
 const FighterGroup = require('agents.FighterGroup');
 const logger = require('log').getLogger('agents.Architect', '#0E9800');
 
@@ -54,6 +55,10 @@ class Architect extends BaseAgent {
             }
         });
 
+        const buildingManager = new BuildingManager();
+        buildingManager.initialize(room);
+        this.attachAgent('builders', buildingManager);
+
         // many BuildingManager will be attached to this agent as deemed
         // necessary by the executed tasks, these don't exist yet at the initialization phase.
 
@@ -73,6 +78,7 @@ class Architect extends BaseAgent {
         super.save(state);
         state.unassignedCreepActorIds = this.unassignedCreepActorIds;
         state.nbMiningSpots = this.nbMiningSpots;
+        state.containerLocations = this.containerLocations;
     }
 
     load(state) {
@@ -80,6 +86,7 @@ class Architect extends BaseAgent {
         // restore the assigned creep actor from saved id
         this.unassignedCreepActorIds = state.unassignedCreepActorIds;
         this.nbMiningSpots = state.nbMiningSpots;
+        this.containerLocations = state.containerLocations;
     }
 
     /**
@@ -117,6 +124,45 @@ class Architect extends BaseAgent {
             this.getSourceManagers().map(s => s.getNbMiningSpots()));
         logger.debug(`Architect (room=${room}) has ${this.nbMiningSpots} mining spots.`);
         return this.nbMiningSpots;
+    }
+
+    /**
+     * The architect retain the position of the containers it can then pass on
+     * to the objectives and tasks scheduled to the managers.
+     * There is a container at each non-wall terrain next to a source,
+     * as well as a couple of containers next to the source where haulers can deposit
+     * The result of this function is cached and will never be recomputed.
+     */
+    getContainerLocations() {
+        if (this.containerLocations) { return this.containerLocations; }
+
+        this.containerLocations = [];
+
+        this.getSourceManagers().forEach(s => {
+            s.findMiningSpots().forEach(pos => {
+                this.containerLocations.push(pos);
+            });
+        });
+
+        const room = this.object('room');
+        const controllerPos = this.agent('controller').object('controller').pos;
+        const adjacentOpen = room.lookAtArea(
+            controllerPos.y - 1, controllerPos.x - 1,
+            controllerPos.y + 1, controllerPos.y - 1, true).filter(lookObj => {
+            return (lookObj.type === LOOK_TERRAIN &&
+                    lookObj[lookObj.type] !== 'wall');
+        });
+        let k = 0;
+        for (let i = 0; i < adjacentOpen.length; i++) {
+            this.containerLocations.push({
+                x: adjacentOpen[i].x,
+                y: adjacentOpen[i].y
+            });
+            k++;
+            if (k > 2) { break; }
+        }
+
+        return this.containerLocations;
     }
 }
 
