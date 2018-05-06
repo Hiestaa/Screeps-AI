@@ -107,7 +107,8 @@ class Architect extends BaseAgent {
     getSourceManagers() {
         return Object.keys(this.attachedAgents)
             .filter(k => k.startsWith('source_'))
-            .map(k => this.agent(k));
+            .map(k => this.agent(k))
+            .filter(sm => !sm.isDangerous());
     }
     /**
      * Count the number of mining spots available in all the sources of this room.

@@ -21,7 +21,7 @@ class BeHarvested extends BaseTask {
      */
     constructor(memory={}) {
         super(T_BE_HARVESTED, AT_SOURCE_MANAGER, memory, {
-            frequency: 5
+            frequency: 15
         });
     }
 

@@ -97,6 +97,40 @@ class CreepActor extends BaseAgent {
         }
         super.scheduleTask(action);
     }
+
+    /**
+     * Compute the amount of energy this creep is able to harvest based on its
+     * body parts.
+     * TODO: include body part boosts in the calculation
+     * @return {integer} - amount of energy a the creep is expected to be able
+     *         to harvest in one tick.
+     */
+    harvestCapacity() {
+        return this.object('creep').body.filter(({type, hits}) => {
+            return type === WORK && hits > 0;
+        }).length * HARVEST_POWER;
+    }
+
+    /**
+     * Compute the amount of energy this creep is able to spend to build a
+     * structure based on its body parts.
+     * TODO: include body part boosts in the calculation
+     * @return {integer} - amount of energy a the creep is expected to be able
+     *         to spend in one tick.
+     */
+    buildCapacity() {
+        return this.object('creep').body.filter(({type, hits}) => {
+            return type === WORK && hits > 0;
+        }).length * BUILD_POWER;
+    }
+
+    /**
+     * Compute the amount of energy this creep is able to carry.
+     * @return {integer} - amount of energy a the creep is able to carry.
+     */
+    carryCapacity() {
+        return this.object('creep').carryCapacity;
+    }
 }
 
 

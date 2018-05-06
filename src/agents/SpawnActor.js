@@ -45,7 +45,7 @@ class SpawnActor extends BaseAgent {
             }
             else {
                 this.nbSpawnedByProfile[profile] = (
-                    this.nbSpawnedByProfile[profile] || 1) + 1;
+                    this.nbSpawnedByProfile[profile] || 0) + 1;
             }
         });
     }

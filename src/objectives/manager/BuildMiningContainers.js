@@ -24,23 +24,22 @@ class BuildMiningContainers extends BaseObjective {
         );
     }
 
-    getPendingConstructionSites() {
-        const room = this.object('room');
+    getPendingConstructionSites(room) {
         this.state.pending = this.state.pending || Array.from(this.params.locations);
         return this.state.pending
             .map(({x, y}) => {
                 const sites = room.lookAt(x, y).filter(lookObj => {
                     return lookObj.type === LOOK_CONSTRUCTION_SITES;
-                });
+                }).map(lookObj => lookObj[lookObj.type]);
                 if (sites.length === 0) { return null; }
+                if (sites[0].progress >= sites[0].progressTotal) { return null; }
                 return sites[0];
             })
             .filter(site => !!site);
     }
 
-    findConstructionSites() {
-        const room = this.object('room');
-        this.params.locations
+    findConstructionSites(room) {
+        return this.params.locations
             .map(({x, y}) => {
                 const sites = room.lookAt(x, y).filter(lookObj => {
                     return lookObj.type === LOOK_CONSTRUCTION_SITES;
@@ -52,7 +51,7 @@ class BuildMiningContainers extends BaseObjective {
     }
 
     execute(builders) {
-        const room = this.object('room');
+        const room = builders.object('room');
         // state 1: haven't created sites yet. Do so now.
         if (!this.state.sitesCreated) {
             this.params.locations.forEach(({x, y}) => {
@@ -66,30 +65,30 @@ class BuildMiningContainers extends BaseObjective {
 
         // state 2: waiting to see the sites pop in the game state
         if (!this.state.sitesFound) {
-            const allSites = this.findConstructionSites();
+            const allSites = this.findConstructionSites(room);
             this.state.sitesFound = allSites.length > 0;
             if (!this.state.sitesFound) { return; }
         }
 
         // state 3: construction sites have been found - schedule build actions for
         // the pending ones.
-        const pending = this.getPendingConstructionSites();
+        // FIXME: There seems to be an issue one the construction is complete
+        // creeps keeps trying to build the same one that is finished,
+        // and fail because of ERR_CONSTRUCTION_COMPLETE or something
+        const pending = this.getPendingConstructionSites(room);
         if (pending.length === 0) {
             builders.setObjective(new MaintainBuildings());
         }
         let k = 0;
-
         Object.keys(builders.attachedAgents).forEach(key => {
             const creepActor = builders.attachedAgents[key];
 
-            if (key === 'controller') { return; }
             if (creepActor.type !== AT_CREEP_ACTOR) { return; }
 
             if (creepActor.hasTaskScheduled(A_BUILD)) { return; }
 
             const site = pending[k % pending.length];
             k++;
-
             creepActor.scheduleTask(new Build({
                 params: {siteId: site.id},
                 priority: 15

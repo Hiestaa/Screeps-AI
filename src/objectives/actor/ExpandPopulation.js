@@ -57,7 +57,7 @@ class ExpandPopulation extends BaseObjective {
         const handlerId = this.params.handlerId;
         // count the number of creeps pending for creation for each profile
         const pendingPerProfile = {};
-        spawnActor._tasksList.forEach(t => {
+        spawnActor.forEachScheduledTask(t => {
             if (t.type === T_SPAWN) {
                 pendingPerProfile[t.params.profile] = (
                     pendingPerProfile[t.params.profile] || 0) + 1;

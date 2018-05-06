@@ -29,11 +29,13 @@ class Build extends BaseCreepAction {
             state,
             priority
         });
+        this.amountSpent = 0;
     }
 
     execute(creepActor) {
         super.execute(creepActor);
         const creep = creepActor.object('creep');
+        if (creep.carry.energy === 0) { return; }
         const site = Game.getObjectById(this.params.siteId);
 
         const code = creep.build(site);
@@ -41,8 +43,13 @@ class Build extends BaseCreepAction {
             creep.moveTo(site, {visualizePathStyle: {stroke: '#72FF00'}});
         }
         else if (code !== OK) {
-            logger.failure(code, 'Couldn\'t build designated construction site');
+            logger.failure(
+                code, 'Couldn\'t build designated construction site: ' +
+                this.params.siteId);
             this.state.failure = true;
+        }
+        else {
+            this.amountSpent = creepActor.buildCapacity();
         }
     }
 
@@ -51,7 +58,11 @@ class Build extends BaseCreepAction {
      * @param {CreepActor} creepActor - creep actor executing the action
      */
     finished(creepActor) {
-        return creepActor.object('creep').carry.energy == 0 || this.state.failure;
+        // const site = Game.getObjectById(this.params.siteId);
+        return (
+            creepActor.object('creep').carry.energy - this.amountSpent) == 0
+            // || site.progress + this.amountSpent >= site.progressTotal
+            || this.state.failure;
     }
 
     shortDescription() {

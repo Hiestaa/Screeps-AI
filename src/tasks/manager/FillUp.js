@@ -31,7 +31,7 @@ class FillUp extends BaseTask {
             creepActor.scheduleTask(
                 new Haul({
                     params: {targetId: spawnManager.object('spawn').id},
-                    priority: 10
+                    priority: 20
                 })
             );
         });

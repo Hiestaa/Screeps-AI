@@ -36,18 +36,19 @@ class Harvest extends BaseCreepAction {
     execute(creepActor) {
         super.execute(creepActor);
         const creep = creepActor.attachedGameObjects.creep;
-        if(creep.carry.energy < creep.carryCapacity) {
-            var source = Game.getObjectById(this.params.sourceId);
-            if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
-            }
-            else {
-                // TODO: This should depends on the number of WORK body parts
-                this.amountHarvested += 2;
-            }
+        if (creep.carry.energy === creep.energyCapacity) { return; }
+        var source = Game.getObjectById(this.params.sourceId);
+        const code = creep.harvest(source);
+        if(code === ERR_NOT_IN_RANGE) {
+            creep.moveTo(source, {visualizePathStyle: {stroke: '#ffaa00'}});
+        }
+        else if (code !== OK) {
+            logger.failure(code, 'Couldn\'t harvest energy from source ' + source.id.slice(0, 3));
+            this.state.failure = true;
         }
         else {
-            logger.info('Creep is Full. Task should be finished.');
+            // TODO: don't assume the source is going to be full
+            this.amountHarvested += creepActor.harvestCapacity();
         }
     }
 
@@ -57,7 +58,7 @@ class Harvest extends BaseCreepAction {
      */
     finished(creepActor) {
         const creep = creepActor.object('creep');
-        return creep.carry.energy + this.amountHarvested > creep.carryCapacity - 2;
+        return creep.carry.energy + this.amountHarvested >= creep.carryCapacity;
     }
 
     shortDescription() {

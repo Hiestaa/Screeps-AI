@@ -180,11 +180,6 @@ class BaseAgent {
      * from the task list if the current task is finished.
      */
     run() {
-        if (!this.currentTask && !this.currentObjective && this._tasksList.length == 0) {
-            logger.debug(`Run Idle (name=${this.name} type=${this.type})`);
-            return;
-        }
-
         if (hasAnyAgentBeenDeleted()) {
             // check that we don't have any attached agent deleted in the current tick
             // TODO: better yet would be to link all agents both ways, so we know the
@@ -197,11 +192,16 @@ class BaseAgent {
                     if (this.attachedAgentIds[k]) {
                         delete this.attachedAgentIds[k];
                     }
-                    if (this.attachedagents[k]) {
+                    if (this.attachedAgents[k]) {
                         delete this.attachedAgents[k];
                     }
                 }
             });
+        }
+
+        if (!this.currentTask && !this.currentObjective && this._tasksList.length == 0) {
+            logger.debug(`Run Idle (name=${this.name} type=${this.type})`);
+            return;
         }
 
         logger.debug(`Run (name=${this.name} type=${this.type})`);
@@ -314,6 +314,19 @@ class BaseAgent {
             allTasks = allTasks.filter(t => t.type === taskType);
         }
         return allTasks.length;
+    }
+
+    /**
+     * Execute a custom function for each task being executed or scheduled
+     * for execution.
+     * @param {Function} fn - the function to execute, the task object will be
+     *                        given as sole argument.
+     */
+    forEachScheduledTask(fn) {
+        if (this.currentTask) {
+            fn(this.currentTask);
+        }
+        this._tasksList.forEach(fn);
     }
 
     notifyTaskScheduled(task) {

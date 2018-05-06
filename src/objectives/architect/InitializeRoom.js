@@ -36,10 +36,6 @@ class InitializeRoom extends BaseObjective {
         this.state.handledProfiles = this.state.handledProfiles || {};
     }
     execute(architect) {
-        // Idea: could optimize this part, to avoid recomputing anything, by transforming
-        // the PopulateInitialGroups action in a WaitForCreepGroupDispatch,
-        // schedule all of them right away and directly schedule a task
-        // that will set the UpgradeRCL2 objective.
         if (architect.unassignedCreepActorIds.length > 0) {
             const creepActorIds = architect.unassignedCreepActorIds.splice(0);
             creepActorIds.forEach(caId => {

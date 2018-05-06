@@ -62,9 +62,9 @@ class PopulateInitialGroups extends BaseTask {
             architect.agent('spawn').handleNewAgent(creepActor);
         });
 
-        // now distribute all creeps to the controller
+        // now distribute all creeps to the building group
         creepActorsForSpawn.forEach(creepActor => {
-            architect.agent('controller').handleNewAgent(creepActor);
+            architect.agent('builders').handleNewAgent(creepActor);
         });
 
         // at this point, the creep actors should each be assigned to a worker group

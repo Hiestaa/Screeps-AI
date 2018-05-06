@@ -30,9 +30,10 @@ class BuildingManager extends BaseManager {
         for (var i = 0; i < constructionSiteIds.length; i++) {
             attachedGameObjectIds[`constructionSite_${i}`] = constructionSiteIds[i];
         }
+        attachedGameObjectIds['room'] = room.name;
         super.initialize(
             'BuildingManager R' + room.name, AT_BUILDING_MANAGER,
-            creepActorIds, {room: room.name}, attachedGameObjectIds);
+            creepActorIds, {}, attachedGameObjectIds);
     }
 
     findGameObject(key, val) {
