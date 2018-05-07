@@ -24,13 +24,17 @@ class BaseProfile {
      * @param {Array<CONST>} baseBodyParts - the list of base, fixed body part that need to be
      *                present for this creep profile to execute its tasks at the lowest efficiency
      *                possible. This will determine the min cost of this creep profile.
-     * @param {Integer} toughness - the toughness level (number of TOUGH body parts to add)
-     * @param {Integer} efficiency - efficiency level (number of mainBodyPart to add)
-     * @param {CONST} speed - speed level of this creep
+     * @param {Object} [upgrade] - upgrades to apply to this creep profile
+     * @param {Integer} [upgrades.toughness=0] - the toughness level (number of TOUGH body parts to add)
+     * @param {Integer} [upgrades.efficiency=0] - efficiency level (number of mainBodyPart to add)
+     * @param {CONST} [upgrades.speed=0] - speed level of this creep
      *                /!\ `(baseBodyParts.length + toughness + efficiency) * (speedFactor + 1) < 50` /!\
      */
-    constructor(name, mainBodyPart, baseBodyParts, toughness, efficiency, speed) {
+    constructor(name, mainBodyPart, baseBodyParts, {toughness, efficiency, speed}={}) {
         const bodyParts = [];
+        toughness = toughness || 0;
+        efficiency = efficiency || 0;
+        speed = speed || CPS_SLOW;
         // first push the toughness related body parts, because these will take hit first
         for (let i = 0; i < toughness; i++) {
             bodyParts.push(TOUGH);

@@ -131,6 +131,10 @@ class BaseAgent {
 
         Object.keys(this.attachedGameObjectIds).forEach(key => {
             this.attachedGameObjects[key] = this.findGameObject(key, this.attachedGameObjectIds[key]);
+            if (!this.attachedGameObjects[key]) {
+                logger.warning(`${this.name}: Unable to load attached game object ` +
+                               `${key}[id=${this.attachedGameObjectIds[key]}]`);
+            }
         });
 
         if (memory.currentTask) {

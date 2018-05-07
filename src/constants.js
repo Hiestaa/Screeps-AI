@@ -3,6 +3,7 @@ const murmurhash3_gc = require('utils.murmurhash3_gc');
 const CONSTANTS = [
     /* Creeps profiles */
     'CP_WORKER',
+    'CP_HARVESTER',
     'CP_HAULER',
     'CP_FIGHTER',
     'CP_RANGED_FIGHTER',
@@ -80,6 +81,7 @@ const CONSTANTS = [
 
     /* Actions */
     'A_HARVEST',
+    'A_HARVEST_FOREVER',
     'A_UPGRADE',
     'A_BUILD',
     'A_REPAIR',

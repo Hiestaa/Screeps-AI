@@ -21,7 +21,7 @@ class SpawnActor extends BaseAgent {
      */
     initialize(spawn) {
         super.initialize(`SpawnActor ${spawn.name}`,
-            AT_SPAWN_ACTOR, {}, {spawn: spawn.id});
+            AT_SPAWN_ACTOR, {}, {spawn: spawn.name});
 
         // name -> profile
         // remembers which creeps were spawned by that particular spawn
@@ -32,6 +32,13 @@ class SpawnActor extends BaseAgent {
         // this should be populated by the T_SPAWN task as well but will be reloaded
         // after each tick anyway.
         this.nbSpawnedByProfile = {};
+    }
+
+    findGameObject(key, val) {
+        if (key === 'spawn' && Game.spawns[val]) {
+            return Game.spawns[val];
+        }
+        return Game.getObjectById(val);
     }
 
     load(state) {
