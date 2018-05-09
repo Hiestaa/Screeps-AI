@@ -10,7 +10,6 @@ const {
 const PopulateInitialGroups = require('tasks.architect.PopulateInitialGroups');
 const StayFilledUp = require('objectives.manager.StayFilledUp');
 const DistributeEnergy = require('objectives.manager.DistributeEnergy');
-// const KeepUpgradingController = require('objectives.manager.KeepUpgradingController');
 const UpgradeRCL2 = require('objectives.architect.UpgradeRCL2');
 const BuildMiningContainers = require('objectives.manager.BuildMiningContainers');
 // const ClearRoomThreat = require('objectives.manager.ClearRoomThreat');
@@ -49,16 +48,11 @@ class InitializeRoom extends BaseObjective {
         const spawnManager = architect.agent('spawn');
         const sources = architect.getSourceManagers();
         // const defenseGroup = architect.agent('defenseGroup');
-        // const controllerManager = architect.agent('controller');
         const builders = architect.agent('builders');
 
         if (!spawnManager.hasObjective()) {
             spawnManager.setObjective(new StayFilledUp());
         }
-
-        // if (!controllerManager.hasObjective()) {
-        //     controllerManager.setObjective(new KeepUpgradingController());
-        // }
 
         sources.forEach(s => {
             if (!s.hasObjective() && !s.isDangerous()) {

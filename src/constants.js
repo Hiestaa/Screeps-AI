@@ -60,9 +60,9 @@ const CONSTANTS = [
     'T_INITIALIZE_COLONY',
     /* * Architect */
     'T_POPULATE_INITIAL_GROUPS',
+    'T_POPULATE_GROUPS_FROM_PROFILE',
     'T_PLACE_CONSTRUCTION_SITE',
     /* * Manager */
-    'T_BE_HARVESTED',
     'T_FILLUP',
     'T_BE_UPGRADED',
     'T_EVALUATE_THREAT_DANGEROSITY',
@@ -86,6 +86,8 @@ const CONSTANTS = [
     'A_BUILD',
     'A_REPAIR',
     'A_HAUL',
+    'A_FETCH',
+    'A_CARRY',
     'A_MOVE',
     'A_ATTACK',
     'A_RANGED_ATTACK',

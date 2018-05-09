@@ -3,14 +3,18 @@ const {
     A_UPGRADE,
     CP_WORKER
 } = require('constants');
+const Fetch = require('tasks.creepActions.Fetch');
+const Harvest = require('tasks.creepActions.Harvest');
+const math = require('utils.math');
+const logger = require('log').getLogger('tasks.creepAction.Upgrade', 'white');
 
 
 /**
  * Move towards the assigned controller until reach, then upgrade the
  * controller until energy depletion.
- * TODO: Make sure Haulers move out of the way if they have
- * nowhere to deposit energy to....
- * Right now they will just stop in the middle of the way :D
+ * TODO: to make them smarter and avoid dealing with haulers right now,
+ * make the creep look for energy in a container nearby the controller if there is one,
+ * or from a container anywhere in the room, or harvest the energy by themselves.
  */
 class Upgrade extends BaseCreepAction {
     /**
@@ -32,13 +36,67 @@ class Upgrade extends BaseCreepAction {
         });
     }
 
+    /**
+     * Find a source to harvest from in the creep's room.
+     */
+    findSource(creepActor) {
+        const creep = creepActor.object('creep');
+        const sources = creep.room.find(STRUCTURE_SPAWN);
+        if (sources.length === 0) {
+            logger.error(
+                'No energy container or source to harvest from - ' + creep.name +
+                ' is unable to upgrade controller of room: ' + creep.room.name);
+        }
+        const {item} = math.min(sources, (source => creep.pos.getRangeTo(source.pos)));
+
+        creepActor.scheduleTask(new Harvest({
+            priority: this.priority,
+            params: {sourceId: item.id}
+        }));
+    }
+
+    /**
+     * Find a container that holds energy in the room of the given creep and schedule
+     * a fetch task, then a new upgrade task.
+     * @param {CreepActor} creepActor - the actor who execute this action
+     */
+    findEnergyContainer(creepActor) {
+        const creep = creepActor.object('creep');
+        const containers = creep.room.find(STRUCTURE_CONTAINER)
+            .filter(s => s.store[RESOURCE_ENERGY] > 0);
+        if (containers.length === 0) {
+            this.findSource(creepActor);
+        }
+        else {
+            const {item} = math.max(containers, (container => container.store[RESOURCE_ENERGY]))
+            creep.scheduleTask(new Fetch({
+                priority: this.priority,
+                params: {containerId: item.id}
+            }));
+        }
+        creepActor.scheduleTask(new Upgrade({
+            priority: this.priority,
+            params: {controllerId: this.params.controllerId}
+        }));
+    }
+
     execute(creepActor) {
         super.execute(creepActor);
         const target = Game.getObjectById(this.params.controllerId);
         const creep = creepActor.object('creep');
-        if (creep.carry.energy === 0) { return; }
-        if(creep.upgradeController(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+
+        // if no energy, look for a container and schedule a fetch task
+        // or a source and schedule a harvest task.
+        if (creep.carry.energy === 0) {
+            return this.findEnergyContainer();
+        }
+        // otherwise, move towards the controller.
+        const code = creep.upgradeController(target, RESOURCE_ENERGY);
+        if(code == ERR_NOT_IN_RANGE) {
             creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+        }
+        else if (code !== OK) {
+            logger.failure(code, `Creep ${creep.name} is unable to upgrade controller of room: ${target.room.name}`);
         }
     }
 

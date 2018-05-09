@@ -2,6 +2,7 @@ const BaseManager = require('agents.BaseManager');
 const {
     AT_CONTROLLER_MANAGER
 } = require('constants');
+const logger = require('log').getLogger('agents.ControllerManager', 'white');
 
 /**
  * The ControllerManager is instanciated on request of an architect and deals
@@ -22,6 +23,49 @@ class ControllerManager extends BaseManager {
                 controller: controller.id
             }
         );
+    }
+
+
+    /**
+     * CPU expensive function that will look at the area around the controller
+     * to find the list of upgrade spots.
+     */
+    findUpgradeSpots() {
+        if (this.danger) { return []; }
+        const controller = this.object('controller');
+
+        const upgradeSpots = controller.room.lookAtArea(
+            controller.pos.y - 1, controller.pos.x - 1,
+            controller.pos.y + 1, controller.pos.x + 1, true
+        ).filter((lookObj) => {
+            return (
+                lookObj.type === LOOK_TERRAIN &&
+                lookObj[lookObj.type] !== 'wall'
+            );
+        }).map(lookObj => {
+            return {x: lookObj.x, y: lookObj.y};
+        });
+        this.nbUpgradeSpots = upgradeSpots.length;
+
+        return upgradeSpots;
+    }
+
+    /**
+     * Get the number of upgrade spots on the attached controller.
+     * The number of upgrade spots is the number of non-wall terrain around the controller.
+     * The result is memorized so calling this function multiple times doesn't
+     * lead to unecessary duplicated computations.
+     * @return {Integer} - the number of upgrade spots
+     */
+    getNbUpgradeSpots() {
+        if (this.nbUpgradeSpots !== null) { return this.nbUpgradeSpots; }
+
+        const controller = this.object('controller');
+        const upgradeSpots = this.findUpgradeSpots();
+        this.nbUpgradeSpots = upgradeSpots.length;
+
+        logger.debug(`${this.name} (controllerId=${controller.id}) has ${this.nbUpgradeSpots} upgrade spots.`);
+        return this.nbUpgradeSpots;
     }
 }
 

@@ -3,7 +3,9 @@ const {
     O_POPULATION_CONTROL,
     AT_COLONY,
     O_UPGRADE_RCL_2,
-    CP_WORKER
+    CP_WORKER,
+    CP_HARVESTER,
+    CP_HAULER
 } = require('constants');
 const ExpandPopulation = require('objectives.actor.ExpandPopulation');
 const logger = require('log').getLogger('tasks.colony.InitializeColony', 'white');
@@ -87,8 +89,32 @@ class PopulationControl extends BaseObjective {
         this.state.currentState = 'ONE_ROOM_DEFINE_RCL1_ROLES';
     }
 
-    oneRoomDefineRcl1Roles() {
-        logger.info('Defining objective for RCL1 roles #TODO');
+    oneRoomDefineRcl1Roles(colony) {
+        logger.info('Defining objective for RCL1 roles');
+        const architect = colony.agent('spawnRoomArchitect');
+
+        // one harvester per source
+        const nbSources = architect.getSourceManagers().length;
+        let profiles = [];
+        for (var i = 0; i < nbSources; i++) {
+            profiles.push(CP_HARVESTER);
+        }
+
+        // one hauler for the spawn
+        profiles.push(CP_HAULER);
+
+        // one worker per upgrade spot
+        const nbUpgradeSpots = architect.agent('controller').getNbUpgradeSpots();
+        for (var j = 0; j < nbUpgradeSpots; j++) {
+            profiles.push(CP_WORKER);
+        }
+
+        logger.debug('Constructing ExpandPopulation objective with profiles: ' +
+                     profiles.join(', '));
+        colony.agent('spawnActor').setObjective(new ExpandPopulation({
+            params: {profiles, handlerId: architect.id}}));
+
+
         this.state.currentState = 'FIRST_REMOTE_MINING_ROOM';
     }
 

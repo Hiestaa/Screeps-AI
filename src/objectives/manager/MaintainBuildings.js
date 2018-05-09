@@ -6,7 +6,7 @@ const {
     A_BUILD
 } = require('constants');
 const Repair = require('tasks.creepActions.Repair');
-// const logger = require('log').createLogger('objectives.manager.MaintainBuildings', 'white');
+const logger = require('log').createLogger('objectives.manager.MaintainBuildings', 'white');
 /**
  * Maintain all buildings in the room associated with the building manager that
  * runs this objective.
@@ -14,17 +14,17 @@ const Repair = require('tasks.creepActions.Repair');
  * lead to.
  */
 class MaintainBuildings extends BaseObjective {
-    constructor({state, params: {locations}}) {
+    constructor(memory={}) {
         super(
             O_MAINTAIN_BUILDINGS, AT_BUILDING_MANAGER,
-            {state, params: {locations}}, {
+            memory, {
                 frequency: 5
             }
         );
     }
 
-    findDamagedStructures() {
-        const room = this.object('room');
+    findDamagedStructures(builders) {
+        const room = builders.object('room');
         return room.find(FIND_MY_STRUCTURES).filter(s => {
             return s.hits < s.hitsMax && s.hits > 0;
         });
@@ -32,7 +32,7 @@ class MaintainBuildings extends BaseObjective {
 
     execute(builders) {
         const pending = this.findDamagedStructures();
-        if (!pending) { return; }
+        if (!pending || !pending.length) { return; }
 
         let k = 0;
 
@@ -45,6 +45,10 @@ class MaintainBuildings extends BaseObjective {
             if (creepActor.hasTaskScheduled(A_BUILD)) { return; }
 
             const structure = pending[k % pending.length];
+
+            if (!structure) {
+                logger.warning(`Pending structure ${k} is undefined`);
+            }
             k++;
 
             creepActor.scheduleTask(new Repair({

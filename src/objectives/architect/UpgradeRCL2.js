@@ -1,9 +1,12 @@
 const BaseObjective = require('objectives.BaseObjective');
 const {
     O_UPGRADE_RCL_2,
-    AT_ARCHITECT
+    AT_ARCHITECT,
+    O_KEEP_UPGRADING_CONTROLLER
 } = require('constants');
-const PopulateInitialGroups = require('tasks.architect.PopulateInitialGroups');
+const PopulateGroupsFromProfile = require('tasks.architect.PopulateGroupsFromProfile');
+const KeepUpgradingController = require('objectives.manager.KeepUpgradingController');
+const DistributeEnergy = require('objectives.manager.DistributeEnergy');
 // const UpgradeRCL3 = require('objectives.architect.UpgradeRCL3');
 
 /**
@@ -22,11 +25,32 @@ class UpgradeRCL2 extends BaseObjective {
     execute(architect) {
         if (architect.unassignedCreepActorIds.length > 0) {
             const creepActorIds = architect.unassignedCreepActorIds.splice(0);
-            architect.scheduleTask(new PopulateInitialGroups({params: {creepActorIds}}));
+            architect.scheduleTask(new PopulateGroupsFromProfile({params: {creepActorIds}}));
         }
-        if (architect.object('room').controller.level >= 2) {
-            // this.setObjective(new UpgradeRCL3());
+
+        // update the objective of the source managers to enable their harvesters to harvest forever
+        const sources = architect.getSourceManagers();
+        sources.forEach(s => {
+            if (!s.isDangerous() && (!s.hasObjective() || !s.currentObjective.params.fixedSpot)) {
+                s.setObjective(new DistributeEnergy({params: {fixedSpot: true}}));
+            }
+        });
+
+        // the controller will now start assigning upgrade tasks to the creep actors it manages
+        const controllerManager = architect.agent('controller');
+        if (!controllerManager.hasObjective(O_KEEP_UPGRADING_CONTROLLER)) {
+            controllerManager.setObjective(new KeepUpgradingController());
         }
+
+        // TODO: logistic system, that will haul energy to the spawn and to the upgrade container
+
+        // do we need to redefine the roles of existing creeps?
+        // probably not - they are going to die doing whatever they wanna do, then
+        // be replaced by other creeps that will be properly assigned.
+
+        // if (architect.object('room').controller.level >= 2) {
+        //     this.setObjective(new UpgradeRCL3());
+        // }
     }
 }
 

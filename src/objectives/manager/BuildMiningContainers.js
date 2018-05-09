@@ -15,7 +15,7 @@ const logger = require('log').getLogger('objectives.manager.BuildMiningContainer
  * finilize the contstruction.
  */
 class BuildMiningContainers extends BaseObjective {
-    constructor({state, params: {locations}}) {
+    constructor({state, params: {locations}}={}) {
         super(
             O_BUILD_MINING_CONTAINERS, AT_BUILDING_MANAGER,
             {state, params: {locations}}, {

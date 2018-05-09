@@ -75,7 +75,10 @@ class ExpandPopulation extends BaseObjective {
             if (nbMissing > 0) {
                 logger.debug(`Missing ${nbMissing} creeps profile ${profile}`);
                 for (var i = 0; i < nbMissing; i++) {
-                    spawnActor.scheduleTask(new SpawnTask({params: {profile, handlerId: handlerId}}));
+                    spawnActor.scheduleTask(new SpawnTask({
+                        // always maximize efficiency for now. We'll have reason to maximize other areas later.
+                        params: {profile, handlerId: handlerId, maximize: 'efficiency'}
+                    }));
                 }
             }
         });

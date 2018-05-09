@@ -45,7 +45,7 @@ class SourceManager extends BaseManager {
     }
 
     /**
-     * CPU expensive functoin that will look at the area around the source
+     * CPU expensive function that will look at the area around the source
      * to find the list of mining spots.
      */
     findMiningSpots() {

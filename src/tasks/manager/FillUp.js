@@ -3,9 +3,9 @@ const {
     AT_SPAWN_MANAGER,
     T_FILLUP,
     AT_CREEP_ACTOR,
-    A_HAUL
+    A_CARRY
 } = require('constants');
-const Haul = require('tasks.creepActions.Haul');
+const Carry = require('tasks.creepActions.Carry');
 
 /**
  * The task of being harvested is given to a source manager.
@@ -26,10 +26,10 @@ class FillUp extends BaseTask {
             if (key === 'source') { return; }
             if (creepActor.type !== AT_CREEP_ACTOR) { return; }
 
-            if (creepActor.hasTaskScheduled(A_HAUL)) { return; }
+            if (creepActor.hasTaskScheduled(A_CARRY)) { return; }
 
             creepActor.scheduleTask(
-                new Haul({
+                new Carry({
                     params: {targetId: spawnManager.object('spawn').id},
                     priority: 20
                 })
