@@ -66,8 +66,11 @@ class BaseManager extends BaseAgent {
     }
 
     notifyDeletedAgent(agent) {
-        if (agent.type === AT_CREEP_ACTOR) {
+        if (agent && agent.type === AT_CREEP_ACTOR) {
             this.nbCreepActors -= 1;
+        }
+        else {
+            logger.error(`Notifying deleted agent: ${agent}`);
         }
     }
 }

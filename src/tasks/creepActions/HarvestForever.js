@@ -1,7 +1,8 @@
 const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
     A_HARVEST_FOREVER,
-    CP_WORKER
+    CP_WORKER,
+    CP_HARVESTER
 } = require('constants');
 const logger = require('log').getLogger('tasks.creepActions.Harvest', '#FEBF00');
 
@@ -23,7 +24,7 @@ class HarvestForever extends BaseCreepAction {
      *                 already been started.
      */
     constructor({priority, params: {sourceId, containerId}, state}) {
-        super(new Set([CP_WORKER]), A_HARVEST_FOREVER, {
+        super(new Set([CP_WORKER, CP_HARVESTER]), A_HARVEST_FOREVER, {
             params: {sourceId, containerId},
             state,
             priority
@@ -44,12 +45,12 @@ class HarvestForever extends BaseCreepAction {
 
     execute(creepActor) {
         super.execute(creepActor);
-        const container = Game.getObjectById(this.params.containerId);
+        // const container = Game.getObjectById(this.params.containerId);
         const creep = creepActor.attachedGameObjects.creep;
-        if (creep.carry.energy === creep.energyCapacity) {
-            this.drop(creep, container);
-            return;
-        }
+        // if (creep.carry.energy === creep.energyCapacity) {
+        //     this.drop(creep, container);
+        //     return;
+        // }
         var source = Game.getObjectById(this.params.sourceId);
         const code = creep.harvest(source);
 
@@ -65,9 +66,10 @@ class HarvestForever extends BaseCreepAction {
         }
 
         // we can drop in the same action! :)
-        if (creep.carry.energy + this.amountHarvested >= creep.carryCapacity) {
-            this.drop(creep, container);
-        }
+        // but no need tho - jut keep harvesting until the full creep lets energy fall on the ground
+        // if (creep.carry.energy + this.amountHarvested >= creep.carryCapacity) {
+        //     this.drop(creep, container);
+        // }
     }
 
     /**

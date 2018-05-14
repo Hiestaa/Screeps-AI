@@ -4,6 +4,7 @@ const {
     CP_WORKER,
 } = require('constants');
 const logger = require('log').getLogger('tasks.creepActions.Build', 'white');
+const SuperFetch = require('tasks.creepActions.SuperFetch');
 
 /**
  * Build energy back to the assigned deposit.
@@ -35,7 +36,22 @@ class Build extends BaseCreepAction {
     execute(creepActor) {
         super.execute(creepActor);
         const creep = creepActor.object('creep');
-        if (creep.carry.energy === 0) { return; }
+
+        // if no energy schedule a SuperFetch task that will look for a container,
+        // dropped energy resource or source to get energy from
+        if (creep.carry.energy === 0) {
+            this.hasFinished = true;
+
+            creepActor.scheduleTask(new SuperFetch({
+                priority: this.priority + 1
+            }));
+            creepActor.scheduleTask(new Build({
+                priority: this.priority - 1,
+                params: {siteId: this.params.siteId}
+            }));
+            return;
+        }
+
         const site = Game.getObjectById(this.params.siteId);
 
         const code = creep.build(site);

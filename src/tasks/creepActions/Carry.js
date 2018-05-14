@@ -76,6 +76,9 @@ class Carry extends BaseCreepAction {
             Game.creeps[this.params.depositId] ||
             Game.getObjectById(this.params.depositId)
         );
+        if (!deposit) {
+            return logger.error(`Unable to find deposit ${this.params.depositId}`);
+        }
         if (this.isFull(deposit)) { return; }
 
         const amount = this.amountToTransfer(creep, deposit);

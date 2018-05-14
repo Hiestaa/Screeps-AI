@@ -46,8 +46,22 @@ function verifyPendingAgents() {
                 return true;
             }
 
+            // creep actors should be pre-initialized, so their memory should already be set
+            // we just need to reload them/
+            // perform regular initialization if the memory doesn't exist, or doesn't have any key
             const creepActor = new CreepActor();
-            creepActor.initialize(creep, profile);
+            if (creep.memory && Object.keys(creep.memory).length > 0) {
+                logger.info(`Loading pre-initialized creep ${creep.memory.name} ` +
+                            `from memory: ${JSON.stringify(creep.memory)}`);
+                creepActor.load(creep.memory);
+                addAgent(creepActor);  // pre-initialized actors are not added to the storage yet
+            } else {
+                logger.info(`Initializing new creep actor ${creep.name}`);
+                creepActor.initialize(creep, profile);
+                // pre-save just in case something wrong happens before the save phase of this tick
+                creepActor.save(creep.memory);
+            }
+
             // TF??
             if (!creepActor.isAlive()) {
                 logger.error(`Creep ${creepActor.name} is dead on birth`);
@@ -65,6 +79,8 @@ function verifyPendingAgents() {
             return true;  // don't error at each call...
         }
     });
+
+    // TODO: also consider all items in `Game.creeps` which may not have any memory, for some reason.
 }
 
 /**

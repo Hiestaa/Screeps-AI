@@ -1,13 +1,15 @@
 const {
     getAgentById,
-    addAgent,
     hasAgentBeenDeleted,
+    addAgent,
     hasAnyAgentBeenDeleted
 } = require('agents.AgentsManager.storage');
+const baseAgentSave = require('agents.BaseAgent.save');
+const baseAgentInitialize = require('agents.BaseAgent.initialize');
 const tasks = require('tasks');
 const objectives = require('objectives');
 const genId = require('utils.id');
-const logger = require('log').getLogger('agents.BaseAgent', '#42D700');
+let logger = require('log').getLogger('agents.BaseAgent.index', '#42D700');
 
 /**
  * An agent is a long lived object in the AI brain, all attributes are saved in Memory after
@@ -65,29 +67,8 @@ class BaseAgent {
      * @param {Object} attachedAgentIds - mapping between strings (keys) and attached agents ids
      * @param {Object} attachedGameObjectIds - mapping between strings keys and game object ids.
      */
-    initialize(name, type, attachedAgentIds, attachedGameObjectIds) {
-        logger.info(`Initialize (type=${type} name=${name} attachedAgentIds=${JSON.stringify(attachedAgentIds)} attachedGameObjectIds=${JSON.stringify(attachedGameObjectIds)})`);
-        this.name = name;
-        this.type = type;
-        this.attachedAgentIds = attachedAgentIds || {};
-        this.attachedAgents = {};
-        this.attachedGameObjectIds = attachedGameObjectIds || {};
-        this.attachedGameObjects = {};  // will be refreshed with new game objects after each tick
-
-        Object.keys(this.attachedAgentIds).forEach(key => {
-            this.attachedAgents[key] = getAgentById(this.attachedAgentIds[key]);
-        });
-
-        Object.keys(this.attachedGameObjectIds).forEach(key => {
-            this.attachedGameObjects[key] = this.findGameObject(key, this.attachedGameObjectIds[key]);
-        });
-
-        this.currentAction = null;
-        this.currentTask = null;
-        this.currentObjective = null;
-
-        this._tasksList = [];  // list of {taskName, taskParams, priority} objects
-
+    initialize(name, type, attachedAgentIds, attachedGameObjectIds, {noWarn}={}) {
+        baseAgentInitialize(this, name, type, attachedAgentIds, attachedGameObjectIds, {noWarn});
         addAgent(this);
     }
 
@@ -127,24 +108,39 @@ class BaseAgent {
 
         Object.keys(this.attachedAgentIds).forEach(key => {
             this.attachedAgents[key] = getAgentById(this.attachedAgentIds[key]);
+            if (!this.attachedAgents[key]) {
+                logger.warning(`${this.name}: Unable to load attached game object under key ` +
+                               `${key}[id=${this.attachedAgentIds[key]}]`);
+                delete this.attachedAgents[key];
+                delete this.attachedAgentIds[key];
+            }
+
         });
 
         Object.keys(this.attachedGameObjectIds).forEach(key => {
             this.attachedGameObjects[key] = this.findGameObject(key, this.attachedGameObjectIds[key]);
             if (!this.attachedGameObjects[key]) {
-                logger.warning(`${this.name}: Unable to load attached game object ` +
+                logger.warning(`${this.name}: Unable to load attached game object under key ` +
                                `${key}[id=${this.attachedGameObjectIds[key]}]`);
+                delete this.attachedGameObjects[key];
+                delete this.attachedGameObjectIds[key];
             }
         });
 
-        if (memory.currentTask) {
+        if (memory.currentTask && tasks[memory.currentTask.type]) {
             this.currentTask = new tasks[memory.currentTask.type](memory.currentTask);
+        }
+        else if (memory.currentTask) {
+            throw new Error(`Class for objective ${memory.currentTask.type} does not exist`);
         }
         else {
             this.currentTask = null;
         }
-        if (memory.currentObjective) {
+        if (memory.currentObjective && objectives[memory.currentObjective.type]) {
             this.currentObjective = new objectives[memory.currentObjective.type](memory.currentObjective);
+        }
+        else if (memory.currentObjective) {
+            throw new Error(`Class for objective ${memory.currentObjective.type} does not exist`);
         }
         else {
             this.currentObjective = null;
@@ -211,8 +207,17 @@ class BaseAgent {
         logger.debug(`Run (name=${this.name} type=${this.type})`);
         if (this.currentTask) {
             logger.debug(`Run > Executing Task ${this.currentTask.type} params=${JSON.stringify(this.currentTask.params)} state=${JSON.stringify(this.currentTask.state)}`);
-            this.currentTask._execute(this);
-            if (this.currentTask._finished(this)) {
+            try {
+                this.currentTask._execute(this);
+                if (this.currentTask._finished(this)) {
+                    this.notifyTaskFinished(this.currentTask);
+                    this.currentTask = null;
+                }
+            }
+            catch (e) {
+                logger.error(`Unable to execute ${this.currentTask.type} (params=${JSON.stringify(this.currentTask.params)}, state=${JSON.stringify(this.currentTask.state)}):`);
+                logger.error(`${e.message}\n${e.stack}`);
+                logger.error('Considering task finished.');
                 this.notifyTaskFinished(this.currentTask);
                 this.currentTask = null;
             }
@@ -243,27 +248,7 @@ class BaseAgent {
      */
     save(memory) {
         logger.debug(`Save (name=${this.name} type=${this.type})`);
-        memory.id = this.id;
-        memory.name = this.name;
-        memory.type = this.type;
-        memory.attachedAgentIds = this.attachedAgentIds;
-        memory.attachedGameObjectIds = this.attachedGameObjectIds;
-
-        if (this.currentTask) {
-            memory.currentTask = this.currentTask.dump();
-        }
-        else {
-            memory.currentTask = null;
-        }
-
-        if (this.currentObjective) {
-            memory.currentObjective = this.currentObjective.dump();
-        }
-        else {
-            memory.currentObjective = null;
-        }
-
-        memory._tasksList = this._tasksList.map(t => t.dump());
+        baseAgentSave(this, memory);
     }
 
     /**
@@ -383,7 +368,7 @@ class BaseAgent {
     hasObjective(objectiveType) {
         return this.currentObjective && (
             objectiveType === undefined ||
-            objectiveType === this.currentObjective);
+            objectiveType === this.currentObjective.type);
     }
 
     /**

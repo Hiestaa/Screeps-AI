@@ -32,7 +32,10 @@ class BuildMiningContainers extends BaseObjective {
                     return lookObj.type === LOOK_CONSTRUCTION_SITES;
                 }).map(lookObj => lookObj[lookObj.type]);
                 if (sites.length === 0) { return null; }
-                if (sites[0].progress >= sites[0].progressTotal) { return null; }
+                // ignore sites that have almost completed progress
+                // this is done to avoid creeps from getting stucks in the sim room
+                // failing to buid the same construction site over and over again.
+                if (sites[0].progress >= sites[0].progressTotal - 5) { return null; }
                 return sites[0];
             })
             .filter(site => !!site);
@@ -72,12 +75,11 @@ class BuildMiningContainers extends BaseObjective {
 
         // state 3: construction sites have been found - schedule build actions for
         // the pending ones.
-        // FIXME: There seems to be an issue one the construction is complete
-        // creeps keeps trying to build the same one that is finished,
-        // and fail because of ERR_CONSTRUCTION_COMPLETE or something
         const pending = this.getPendingConstructionSites(room);
         if (pending.length === 0) {
-            builders.setObjective(new MaintainBuildings());
+            builders.setObjective(new MaintainBuildings({
+                params: this.params
+            }));
         }
         let k = 0;
         Object.keys(builders.attachedAgents).forEach(key => {

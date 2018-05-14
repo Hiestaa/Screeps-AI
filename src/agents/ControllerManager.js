@@ -35,8 +35,8 @@ class ControllerManager extends BaseManager {
         const controller = this.object('controller');
 
         const upgradeSpots = controller.room.lookAtArea(
-            controller.pos.y - 1, controller.pos.x - 1,
-            controller.pos.y + 1, controller.pos.x + 1, true
+            controller.pos.y - 3, controller.pos.x - 3,
+            controller.pos.y + 3, controller.pos.x + 3, true
         ).filter((lookObj) => {
             return (
                 lookObj.type === LOOK_TERRAIN &&

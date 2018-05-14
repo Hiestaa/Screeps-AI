@@ -87,6 +87,7 @@ const CONSTANTS = [
     'A_REPAIR',
     'A_HAUL',
     'A_FETCH',
+    'A_SUPERFETCH',
     'A_CARRY',
     'A_MOVE',
     'A_ATTACK',

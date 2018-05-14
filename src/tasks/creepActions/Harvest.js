@@ -1,7 +1,8 @@
 const BaseCreepAction = require('tasks.creepActions.BaseCreepAction');
 const {
     A_HARVEST,
-    CP_WORKER
+    CP_WORKER,
+    CP_HARVESTER
 } = require('constants');
 const logger = require('log').getLogger('tasks.creepActions.Harvest', '#FEBF00');
 
@@ -25,7 +26,7 @@ class Harvest extends BaseCreepAction {
      *                 already been started.
      */
     constructor({priority, params: {sourceId}, state}) {
-        super(new Set([CP_WORKER]), A_HARVEST, {
+        super(new Set([CP_WORKER, CP_HARVESTER]), A_HARVEST, {
             params: {sourceId},
             state,
             priority
@@ -58,7 +59,8 @@ class Harvest extends BaseCreepAction {
      */
     finished(creepActor) {
         const creep = creepActor.object('creep');
-        return creep.carry.energy + this.amountHarvested >= creep.carryCapacity;
+        return this.state.failure || (
+            creep.carry.energy + this.amountHarvested >= creep.carryCapacity);
     }
 
     shortDescription() {

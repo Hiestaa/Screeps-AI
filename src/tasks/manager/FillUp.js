@@ -6,6 +6,7 @@ const {
     A_CARRY
 } = require('constants');
 const Carry = require('tasks.creepActions.Carry');
+const logger = require('log').getLogger('tasks.manager.FillUp', 'white');
 
 /**
  * The task of being harvested is given to a source manager.
@@ -24,13 +25,17 @@ class FillUp extends BaseTask {
             const creepActor = spawnManager.attachedAgents[key];
 
             if (key === 'source') { return; }
+            if (!creepActor) {
+                logger.error(`${spawnManager.name} Undefined attached agent key: ${key}`);
+                return;
+            }
             if (creepActor.type !== AT_CREEP_ACTOR) { return; }
 
             if (creepActor.hasTaskScheduled(A_CARRY)) { return; }
 
             creepActor.scheduleTask(
                 new Carry({
-                    params: {targetId: spawnManager.object('spawn').id},
+                    params: {depositId: spawnManager.object('spawn').id},
                     priority: 20
                 })
             );

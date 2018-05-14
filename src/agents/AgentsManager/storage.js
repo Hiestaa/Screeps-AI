@@ -153,6 +153,8 @@ exports.clearStorage = () => {
     Memory.agents = {};
     Memory.agentsMemoryLoc = {};
     agents = [];
+    Memory.profilesCount = {};
+    Memory.globalCount = 0;
     Object.keys(agentsById).forEach(k => { delete agentsById[k]; });
     deletedAgents = {};
     logger.warning('/!\\ STORAGE CLEARED /!\\');

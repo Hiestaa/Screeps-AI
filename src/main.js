@@ -19,6 +19,7 @@ module.exports.loop = function () {
     catch (e) {
         logger.fatal(`Interrupted tick: ${e.message}\n${e.stack}`);
         debugger;  // eslint-disable-line no-debugger
+        throw e;
     }
     logger.debug('[MAIN] Tick ends.');
     logger.debug('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');

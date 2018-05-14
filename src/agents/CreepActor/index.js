@@ -2,7 +2,8 @@ const BaseAgent = require('agents.BaseAgent');
 const {
     AT_CREEP_ACTOR
 } = require('constants');
-const logger = require('log').getLogger('agents.CreepActor', '#8AFF00');
+const logger = require('log').getLogger('agents.CreepActor.index', '#8AFF00');
+const creepActorSave = require('agents.CreepActor.save');
 
 /**
  * The creep actor is created to control the behavior of a creep.
@@ -64,7 +65,7 @@ class CreepActor extends BaseAgent {
 
     load(state) { super.load(state); this.creepProfile = state.creepProfile; }
 
-    save(state) { super.save(state); state.creepProfile = this. creepProfile; }
+    save(state) { creepActorSave(this, state); }
 
     isAlive() {
         const creep = this.object('creep');
@@ -90,8 +91,9 @@ class CreepActor extends BaseAgent {
 
     scheduleTask(action) {
         if (action.profiles && !action.profiles.has(this.creepProfile)) {
+            const profiles = Array.from(action.profiles).join(', ');
             logger.warning(
-                `Scheduling invalid action ${action.type} (valid profiles: ${action.profiles.join(', ')}) ` +
+                `Scheduling invalid action ${action.type} (valid profiles: ${profiles}) ` +
                 `to creep actor ${this.name} of profile: ${this.creepProfile}`);
             debugger;  // eslint-disable-line no-debugger
         }

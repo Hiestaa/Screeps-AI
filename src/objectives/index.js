@@ -8,14 +8,14 @@ const {
     O_GARRISONS,
     O_BUILD_MINING_CONTAINERS,
     O_MAINTAIN_BUILDINGS,
-    O_UPGRADE_RCL2,
+    O_UPGRADE_RCL_2,
     O_POPULATION_CONTROL
 } = require('constants');
 
 module.exports = {
     [O_KEEP_UPGRADING_CONTROLLER]: require('objectives.manager.KeepUpgradingController'),
     [O_INITIALIZE_ROOM]: require('objectives.architect.InitializeRoom'),
-    [O_UPGRADE_RCL2]: require('objectives.architect.UpgradeRCL2'),
+    [O_UPGRADE_RCL_2]: require('objectives.architect.UpgradeRCL2'),
     [O_STAY_FILLED_UP]: require('objectives.manager.StayFilledUp'),
     [O_DISTRIBUTE_ENERGY]: require('objectives.manager.DistributeEnergy'),
     [O_CLEAR_ROOM_THREATS]: require('objectives.manager.ClearRoomThreat'),

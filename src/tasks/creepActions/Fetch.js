@@ -21,12 +21,14 @@ class Fetch extends BaseCreepAction {
      * @param {Object} memory.params - parameters for this objective, beware that
                        some objectives might have some required parameters
      * @param {ObjectId} memory.params.containerId - id of the container from which to grab the energy
+     * @param {Resource} memory.params.resourceId - id of the resource to fetch.
+     *                   Only one of `resourceId` and `containerId` will be considered.
      * @param {Object} [memory.state] - the state of this objective, if the objective has
      *                 already been started.
      */
-    constructor({priority, params: {containerId}, state}) {
+    constructor({priority, params: {containerId, resourceId}, state}) {
         super(new Set([CP_WORKER, CP_HAULER]), A_FETCH, {
-            params: {containerId},
+            params: {containerId, resourceId},
             state,
             priority
         });
@@ -35,14 +37,25 @@ class Fetch extends BaseCreepAction {
 
     execute(creepActor) {
         super.execute(creepActor);
-
-        const container = Game.getObjectById(this.params.containerId);
+        let container, resource;
+        if (this.params.containerId) {
+            container = Game.getObjectById(this.params.containerId);
+        }
+        else if (this.params.resourceId) {
+            resource = Game.getObjectById(this.params.resourceId);
+        }
         const creep = creepActor.object('creep');
+        // TODO: can't withdraw more than there is energy dropped!
         const energyToWithdraw = creep.carryCapacity - _.sum(creep.carry);
-
-        const code = creep.withdraw(container, RESOURCE_ENERGY, energyToWithdraw);
+        let code;
+        if (container) {
+            code = creep.withdraw(container, RESOURCE_ENERGY, energyToWithdraw);
+        }
+        else {
+            code = creep.pickup(resource);
+        }
         if (code === ERR_NOT_IN_RANGE) {
-            creep.moveTo(container, {visualizePathStyle: {stroke: '#FFEA00'}});
+            creep.moveTo(container || resource, {visualizePathStyle: {stroke: '#FFEA00'}});
         }
         else if (code === ERR_FULL) {
             // something wrong must have happened, if we were full we should have tried to withdraw 0 energy :[
@@ -50,7 +63,7 @@ class Fetch extends BaseCreepAction {
         }
         else if (code === ERR_NOT_ENOUGH_RESOURCES) {
             // no worries, patiently wait
-            logger.debug('Waiting for resources to be available...');
+            logger.info('Waiting for resources to be available...');
         }
         else if (code !== OK) {
             logger.failure(code, 'Unable to fetch energy from container: ' + this.params.containerId);

@@ -60,9 +60,17 @@ class PopulateGroupsFromProfile extends BaseTask {
         });
 
         // now distribute all haulers to the spawner
+        const spawnManager = architect.agent('spawn');
         haulers.forEach(creepActor => {
-            architect.agent('spawn').handleNewAgent(creepActor);
+            spawnManager.handleNewAgent(creepActor);
         });
+
+        // if the spawner doesn't have any actor, and we have workers to assign to him, do so now.
+        // the worker will *also* be assigned to upgrader, so that it doesn't sit here and
+        // do nothin when the spawn is full
+        if (spawnManager.nbCreepActors === 0 && workers.length > 0) {
+            spawnManager.handleNewAgent(workers[0]);
+        }
 
         // TODO: distribute all haulers to the logistic network, so the containers
         // adjacent to the controller get filled up

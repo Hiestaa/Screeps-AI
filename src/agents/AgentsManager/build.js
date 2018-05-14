@@ -25,13 +25,17 @@ Memory.pendingNewAgents = Memory.pendingNewAgents || [];
  * function called.
  * If spawn creation failed, no actor will be created.
  * @param {StructureSpawn} spawn - the spawn structure the creep should be spawned from
+ * @param {CreepProfile} creepActorMemory - preinitialized memory for the creep to spawn.
  * @param {CreepProfile} profile - instance of the creep profile
  * @param {String} architectId - id of the architect that will be in charge of the creep.
  * @return {Integer} - code returned by `spawnCreep`
  */
-exports.buildPendingCreepActor = (spawnActor, profile, architectId) => {
+exports.buildPendingCreepActor = (spawnActor, creepActorMemory, profile, architectId) => {
     const creepName = profile.getCreepName();
-    const code = spawnActor.spawnCreep(profile.bodyParts, creepName, profile.cost);
+
+    const code = spawnActor.spawnCreep(profile.bodyParts, creepName, profile.cost, {
+        memory: creepActorMemory
+    });
     if (code !== OK) {
         logger.failure(code, 'Unable to build creep actor ' + creepName);
         return code;

@@ -9,7 +9,7 @@ const {
     T_DESTROY_TARGET,
     T_ASSEMBLE_DEFENSE_GROUP,
     A_HARVEST,
-    A_HARVEST_FOREVER
+    A_HARVEST_FOREVER,
     A_HAUL,
     A_UPGRADE,
     A_HEAL,
@@ -18,6 +18,7 @@ const {
     A_BUILD,
     A_REPAIR,
     A_FETCH,
+    A_SUPERFETCH,
     A_CARRY
 } = require('constants');
 
@@ -35,6 +36,7 @@ module.exports = {
     [A_HARVEST_FOREVER]: require('tasks.creepActions.HarvestForever'),
     [A_HAUL]: require('tasks.creepActions.Haul'),
     [A_FETCH]: require('tasks.creepActions.Fetch'),
+    [A_SUPERFETCH]: require('tasks.creepActions.SuperFetch'),
     [A_CARRY]: require('tasks.creepActions.Carry'),
     [A_UPGRADE]: require('tasks.creepActions.Upgrade'),
     [A_HEAL]: require('tasks.creepActions.Heal'),

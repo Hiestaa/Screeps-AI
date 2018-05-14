@@ -4,8 +4,8 @@ const {
     CP_WORKER,
     CP_HAULER
 } = require('constants');
-const Fetch = require('tasks.creepActor.Fetch');
-const Carry = require('tasks.creepActor.Carry');
+const Fetch = require('tasks.creepActions.Fetch');
+const Carry = require('tasks.creepActions.Carry');
 const logger = require('log').getLogger('tasks.creepActions.Haul', 'white');
 
 /**

@@ -66,8 +66,8 @@ class SpawnActor extends BaseAgent {
         return this.object('spawn').energy - this.usedEnergyDuringTick;
     }
 
-    spawnCreep(bodyParts, creepName, cost) {
-        const code = this.object('spawn').spawnCreep(bodyParts, creepName);
+    spawnCreep(bodyParts, creepName, cost, options) {
+        const code = this.object('spawn').spawnCreep(bodyParts, creepName, options);
         if (code === OK) {
             this.usedEnergyDuringTick += cost;
         }
