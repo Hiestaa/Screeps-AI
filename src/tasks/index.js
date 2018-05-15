@@ -8,6 +8,7 @@ const {
     T_EVALUATE_THREAT_DANGEROSITY,
     T_DESTROY_TARGET,
     T_ASSEMBLE_DEFENSE_GROUP,
+    T_BUILD_CONSTRUCTION_SITES,
     A_HARVEST,
     A_HARVEST_FOREVER,
     A_HAUL,
@@ -19,7 +20,7 @@ const {
     A_REPAIR,
     A_FETCH,
     A_SUPERFETCH,
-    A_CARRY
+    A_CARRY,
 } = require('constants');
 
 module.exports = {
@@ -32,6 +33,7 @@ module.exports = {
     [T_EVALUATE_THREAT_DANGEROSITY]: require('tasks.manager.EvaluateThreatDangerosity'),
     [T_DESTROY_TARGET]: require('tasks.manager.DestroyTarget'),
     [T_ASSEMBLE_DEFENSE_GROUP]: require('tasks.manager.AssembleDefenseGroup'),
+    [T_BUILD_CONSTRUCTION_SITES]: require('tasks.manager.BuildConstructionSites'),
     [A_HARVEST]: require('tasks.creepActions.Harvest'),
     [A_HARVEST_FOREVER]: require('tasks.creepActions.HarvestForever'),
     [A_HAUL]: require('tasks.creepActions.Haul'),

@@ -1,27 +1,28 @@
-const BaseObjective = require('objectives.BaseObjective');
+const BaseTask = require('tasks.BaseTask');
 const {
     AT_BUILDING_MANAGER,
-    O_BUILD_MINING_CONTAINERS,
+    T_BUILD_CONSTRUCTION_SITES,
     AT_CREEP_ACTOR,
     A_BUILD
 } = require('constants');
 const Build = require('tasks.creepActions.Build');
-const MaintainBuildings = require('objectives.manager.MaintainBuildings');
-const logger = require('log').getLogger('objectives.manager.BuildMiningContainers', 'white');
+const lookUtils = require('utils.look');
+const logger = require('log').getLogger('tasks.manager.BuildConstructionSites', 'white');
 /**
- * The BuildMiningContainers objective creates the construction sites for containers
- * at all available mining positions.
+ * The BuildConstructionSites objective creates the construction sites for of
+ * the defined type at all available mining positions.
  * It then schedules A_BUILD tasks periodically to let the creeps it controls
  * finilize the contstruction.
  */
-class BuildMiningContainers extends BaseObjective {
-    constructor({state, params: {locations}}={}) {
+class BuildConstructionSites extends BaseTask {
+    constructor({state, params: {locations, structureType}, priority}={}) {
         super(
-            O_BUILD_MINING_CONTAINERS, AT_BUILDING_MANAGER,
-            {state, params: {locations}}, {
+            T_BUILD_CONSTRUCTION_SITES, AT_BUILDING_MANAGER,
+            {state, params: {locations, structureType}, priority}, {
                 frequency: 5
             }
         );
+        this.hasFinished = false;
     }
 
     getPendingConstructionSites(room) {
@@ -43,13 +44,7 @@ class BuildMiningContainers extends BaseObjective {
 
     findConstructionSites(room) {
         return this.params.locations
-            .map(({x, y}) => {
-                const sites = room.lookAt(x, y).filter(lookObj => {
-                    return lookObj.type === LOOK_CONSTRUCTION_SITES;
-                });
-                if (sites.length === 0) { return null; }
-                return sites[0];
-            })
+            .map(({x, y}) => lookUtils.lookAtConstructionSite(room, x, y))
             .filter(site => !!site);
     }
 
@@ -58,7 +53,7 @@ class BuildMiningContainers extends BaseObjective {
         // state 1: haven't created sites yet. Do so now.
         if (!this.state.sitesCreated) {
             this.params.locations.forEach(({x, y}) => {
-                const code = room.createConstructionSite(x, y, STRUCTURE_CONTAINER);
+                const code = room.createConstructionSite(x, y, this.params.structureType);
                 if (code !== OK) {
                     logger.failure(code, `Unable to create construction site at {x: ${x}, y: ${y}}`);
                 }
@@ -77,9 +72,7 @@ class BuildMiningContainers extends BaseObjective {
         // the pending ones.
         const pending = this.getPendingConstructionSites(room);
         if (pending.length === 0) {
-            builders.setObjective(new MaintainBuildings({
-                params: this.params
-            }));
+            this.hasFinished = true;
         }
         let k = 0;
         Object.keys(builders.attachedAgents).forEach(key => {
@@ -97,6 +90,10 @@ class BuildMiningContainers extends BaseObjective {
             }));
         });
     }
+
+    finished() {
+        return this.hasFinished;
+    }
 }
 
-module.exports = BuildMiningContainers;
+module.exports = BuildConstructionSites;

@@ -61,7 +61,6 @@ exports.removeAgent = (agent) => {
     deletedAgents[agent.id] = true;
     allDeletedAgents.add(agent.id);
     deleteAgentState(agent.id);
-    // TODO: clear up or notify other agents of the deletion?
 };
 
 exports.getAgentById = (agentId) => {
@@ -133,6 +132,7 @@ const deleteAgentState = (agentId) => {
         }
     }
 };
+exports.deleteAgentState = deleteAgentState;
 
 /**
  * Returns the list of ids of agents for which we have a saved state

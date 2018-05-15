@@ -63,6 +63,7 @@ class Fetch extends BaseCreepAction {
         }
         else if (code === ERR_NOT_ENOUGH_RESOURCES) {
             // no worries, patiently wait
+            creep.moveTo(Math.round(Math.random() * 50), Math.round(Math.random() * 50));
             logger.info('Waiting for resources to be available...');
         }
         else if (code !== OK) {

@@ -7,6 +7,7 @@ const {
 const PopulateGroupsFromProfile = require('tasks.architect.PopulateGroupsFromProfile');
 const KeepUpgradingController = require('objectives.manager.KeepUpgradingController');
 const DistributeEnergy = require('objectives.manager.DistributeEnergy');
+const MaintainBuildings = require('objectives.manager.MaintainBuildings');
 // const UpgradeRCL3 = require('objectives.architect.UpgradeRCL3');
 
 /**
@@ -40,6 +41,16 @@ class UpgradeRCL2 extends BaseObjective {
         const controllerManager = architect.agent('controller');
         if (!controllerManager.hasObjective(O_KEEP_UPGRADING_CONTROLLER)) {
             controllerManager.setObjective(new KeepUpgradingController());
+        }
+
+        const buildingManager = architect.agent('builders');
+        if (!buildingManager.hasObjective()) {
+            buildingManager.setObjective(new MaintainBuildings({
+                params: {
+                    containersLocations: architect.getContainerLocations(),
+                    roomLevel: 1
+                }
+            }));
         }
 
         // TODO: logistic system, that will haul energy to the spawn and to the upgrade container

@@ -2,6 +2,7 @@ const {
     getAgentById,
     hasAgentBeenDeleted,
     addAgent,
+    deleteAgentState,
     hasAnyAgentBeenDeleted
 } = require('agents.AgentsManager.storage');
 const baseAgentSave = require('agents.BaseAgent.save');
@@ -131,7 +132,9 @@ class BaseAgent {
             this.currentTask = new tasks[memory.currentTask.type](memory.currentTask);
         }
         else if (memory.currentTask) {
-            throw new Error(`Class for objective ${memory.currentTask.type} does not exist`);
+            this.currentTask = null;
+            logger.error(`Class for objective ${memory.currentTask.type} does not exist`);
+            // throw new Error(`Class for objective ${memory.currentTask.type} does not exist`);
         }
         else {
             this.currentTask = null;
@@ -140,7 +143,9 @@ class BaseAgent {
             this.currentObjective = new objectives[memory.currentObjective.type](memory.currentObjective);
         }
         else if (memory.currentObjective) {
-            throw new Error(`Class for objective ${memory.currentObjective.type} does not exist`);
+            this.currentObjective = null;
+            logger.error(`Class for objective ${memory.currentObjective.type} does not exist`);
+            // throw new Error(`Class for objective ${memory.currentObjective.type} does not exist`);
         }
         else {
             this.currentObjective = null;
@@ -195,6 +200,7 @@ class BaseAgent {
                     if (this.attachedAgents[k]) {
                         delete this.attachedAgents[k];
                     }
+                    deleteAgentState(id);
                 }
             });
         }
@@ -225,7 +231,15 @@ class BaseAgent {
 
         if (this.currentObjective) {
             logger.debug(`Run > Executing Objective ${this.currentObjective.type} params=${JSON.stringify(this.currentObjective.params)} state=${JSON.stringify(this.currentObjective.state)}`);
-            this.currentObjective._execute(this);
+            try {
+                this.currentObjective._execute(this);
+            }
+            catch (e) {
+                logger.error(`Unable to execute ${this.currentObjective.type} (params=${JSON.stringify(this.currentObjective.params)}, state=${JSON.stringify(this.currentObjective.state)}):`);
+                logger.error(`${e.message}\n${e.stack}`);
+                logger.error('Discarding objective.');
+                this.currentObjective = null;
+            }
         }
 
         // pick next task if the current one is done executing

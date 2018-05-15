@@ -1,8 +1,7 @@
 const BaseObjective = require('objectives.BaseObjective');
 const {
     O_INITIALIZE_ROOM,
-    AT_ARCHITECT,
-    O_MAINTAIN_BUILDINGS
+    AT_ARCHITECT
 } = require('constants');
 const {
     getAgentById
@@ -11,7 +10,8 @@ const PopulateInitialGroups = require('tasks.architect.PopulateInitialGroups');
 const StayFilledUp = require('objectives.manager.StayFilledUp');
 const DistributeEnergy = require('objectives.manager.DistributeEnergy');
 const UpgradeRCL2 = require('objectives.architect.UpgradeRCL2');
-const BuildMiningContainers = require('objectives.manager.BuildMiningContainers');
+const MaintainBuildings = require('objectives.manager.MaintainBuildings');
+const findUtils = require('utils.find');
 // const ClearRoomThreat = require('objectives.manager.ClearRoomThreat');
 
 /**
@@ -61,13 +61,18 @@ class InitializeRoom extends BaseObjective {
         });
 
         if (builders && !builders.hasObjective()) {
-            builders.setObjective(new BuildMiningContainers({
-                params: {locations: architect.getContainerLocations()}
+            builders.setObjective(new MaintainBuildings({
+                params: {
+                    containersLocations: architect.getContainerLocations(),
+                    roomLevel: 1
+                }
             }));
         }
-        else if (builders && builders.hasObjective(O_MAINTAIN_BUILDINGS)) {
+
+        if (findUtils.findContainers(architect.object('room')).length > 0) {
             architect.setObjective(new UpgradeRCL2());
         }
+
 
         // if (!defenseGroup.hasObjective()) {
         //     // clear room threat will itself lead to garrisons objective once

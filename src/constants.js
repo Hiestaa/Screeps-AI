@@ -48,7 +48,6 @@ const CONSTANTS = [
     'O_STAY_FILLED_UP',
     'O_CLEAR_ROOM_THREATS',
     'O_GARRISONS',
-    'O_BUILD_MINING_CONTAINERS',
     'O_MAINTAIN_BUILDINGS',
     /* Tasks */
     /* * Hive mind */
@@ -68,6 +67,7 @@ const CONSTANTS = [
     'T_EVALUATE_THREAT_DANGEROSITY',
     'T_ASSEMBLE_DEFENSE_GROUP',
     'T_DESTROY_TARGET',
+    'T_BUILD_CONSTRUCTION_SITES',
     /* * Actors */
     'T_STORE_ENERGY',
     'T_UPGRADE_RCL',

@@ -3,6 +3,7 @@ const {
     A_REPAIR,
     CP_WORKER,
 } = require('constants');
+const SuperFetch = require('tasks.creepActions.SuperFetch');
 const logger = require('log').getLogger('tasks.creepActions.Repair', 'white');
 
 /**
@@ -36,12 +37,28 @@ class Repair extends BaseCreepAction {
         const creep = creepActor.object('creep');
         const structure = Game.getObjectById(this.params.structureId);
 
+        // if no energy schedule a SuperFetch task that will look for a container,
+        // dropped energy resource or source to get energy from
+        if (creep.carry.energy === 0) {
+            this.hasFinished = true;
+
+            creepActor.scheduleTask(new SuperFetch({
+                priority: this.priority + 1
+            }));
+            creepActor.scheduleTask(new Repair({
+                priority: this.priority - 1,
+                params: {structureId: this.params.structureId}
+            }));
+            return;
+        }
+
+        // otherwise, move towards the structure
         const code = creep.repair(structure);
         if(code == ERR_NOT_IN_RANGE) {
             creep.moveTo(structure, {visualizePathStyle: {stroke: '#72FF00'}});
         }
         else if (code !== OK) {
-            logger.failure(code, 'Couldn\'t build designated construction site');
+            logger.failure(code, 'Couldn\'t repair designated structure');
             this.state.failure = true;
         }
     }
@@ -53,6 +70,7 @@ class Repair extends BaseCreepAction {
     finished(creepActor) {
         const structure = Game.getObjectById(this.params.structureId);
         return (
+            this.hasFinished ||
             creepActor.object('creep').carry.energy == 0 ||
             this.state.failure ||
             structure.hits === structure.hitsMax);

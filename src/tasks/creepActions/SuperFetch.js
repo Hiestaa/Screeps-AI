@@ -8,9 +8,11 @@ const Fetch = require('tasks.creepActions.Fetch');
 const Harvest = require('tasks.creepActions.Harvest');
 const math = require('utils.math');
 const logger = require('log').getLogger('tasks.creepActions.SuperFetch', 'white');
+const findUtils = require('utils.find');
 
 /**
  * Fetch energy from a container, a dropped energy, or harvest from a source.
+ * TODO: include the possiblilty to fetch primarily from an existing gravestone
  */
 class SuperFetch extends BaseCreepAction {
     /**
@@ -78,9 +80,7 @@ class SuperFetch extends BaseCreepAction {
      */
     findEnergyContainer(creepActor) {
         const creep = creepActor.object('creep');
-        const containers = creep.room.find(FIND_STRUCTURES)
-            .filter(s => s.structureType === STRUCTURE_CONTAINER)
-            .filter(s => s.store[RESOURCE_ENERGY] > 0);
+        const containers = findUtils.findContainers(creep.room, {hasEnergy: true});
         if (containers.length === 0) {
             this.findDroppedEnergy(creepActor);
         }
