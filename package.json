@@ -4,7 +4,7 @@
   "description": "An AI for the game screep (or at least, my code wandering in the attempt of getting something to work)",
   "main": "build/main.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha test/**/*.js"
   },
   "repository": {
     "type": "git",

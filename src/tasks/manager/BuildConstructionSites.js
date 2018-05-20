@@ -26,8 +26,7 @@ class BuildConstructionSites extends BaseTask {
     }
 
     getPendingConstructionSites(room) {
-        this.state.pending = this.state.pending || Array.from(this.params.locations);
-        return this.state.pending
+        return this.params.locations
             .map(({x, y}) => {
                 const sites = room.lookAt(x, y).filter(lookObj => {
                     return lookObj.type === LOOK_CONSTRUCTION_SITES;
@@ -44,7 +43,10 @@ class BuildConstructionSites extends BaseTask {
 
     findConstructionSites(room) {
         return this.params.locations
-            .map(({x, y}) => lookUtils.lookAtConstructionSite(room, x, y))
+            .map(({x, y}) => {
+                return lookUtils.lookAtConstructionSite(room, x, y) ||
+                    lookUtils.lookAtStructure(room, x, y);
+            })
             .filter(site => !!site);
     }
 
@@ -72,7 +74,7 @@ class BuildConstructionSites extends BaseTask {
         // the pending ones.
         const pending = this.getPendingConstructionSites(room);
         if (pending.length === 0) {
-            this.hasFinished = true;
+            return this.hasFinished = true;
         }
         let k = 0;
         Object.keys(builders.attachedAgents).forEach(key => {
@@ -84,10 +86,15 @@ class BuildConstructionSites extends BaseTask {
 
             const site = pending[k % pending.length];
             k++;
-            creepActor.scheduleTask(new Build({
-                params: {siteId: site.id},
-                priority: 15
-            }));
+            if (site && site.id) {
+                creepActor.scheduleTask(new Build({
+                    params: {siteId: site.id},
+                    priority: 15
+                }));
+            }
+            else {
+                logger.error(`Pending construction site #${k % pending.length} is ${site}`);
+            }
         });
     }
 

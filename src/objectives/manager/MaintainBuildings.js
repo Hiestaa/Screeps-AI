@@ -4,7 +4,7 @@ const {
     O_MAINTAIN_BUILDINGS,
     AT_CREEP_ACTOR,
     T_BUILD_CONSTRUCTION_SITES,
-    A_BUILD
+    A_REPAIR
 } = require('constants');
 const BuildConstructionSites = require('tasks.manager.BuildConstructionSites');
 const Repair = require('tasks.creepActions.Repair');
@@ -47,7 +47,7 @@ class MaintainBuildings extends BaseObjective {
     verifyMissingContainers(builders) {
         const room = builders.object('room');
         const containers = findUtils.findContainers(room);
-        if (containers.length === 0) {
+        if (containers.length < this.params.containersLocations.length) {
             logger.info('Detected missing containers');
             builders.scheduleTask(new BuildConstructionSites({
                 params: {
@@ -61,10 +61,33 @@ class MaintainBuildings extends BaseObjective {
         }
     }
 
+    verifyMissingExtensions(builders) {
+        const room = builders.object('room');
+        const extensions = findUtils.findExtensions(room);
+        if (extensions.length < this.params.extensionsLocations.length) {
+            logger.info('Detected missing extensions');
+            builders.scheduleTask(new BuildConstructionSites({
+                params: {
+                    locations: this.params.extensionsLocations,
+                    structureType: STRUCTURE_EXTENSION
+                }
+            }));
+        }
+        else {
+            logger.debug(`Found ${extensions.length} extensions`);
+        }
+    }
+
     verifyMissingStructures(builders) {
+        if (builders.hasTaskScheduled(T_BUILD_CONSTRUCTION_SITES)) {
+            return;
+        }
         logger.debug(`Verifying missing structure - controller level=${this.params.roomLevel}`);
         if (this.params.roomLevel >= 1) {
             this.verifyMissingContainers(builders);
+        }
+        if (this.params.roomLevel >= 2) {
+            this.verifyMissingExtensions(builders);
         }
         // TODO: more missing structures as higher levels
     }
@@ -80,7 +103,7 @@ class MaintainBuildings extends BaseObjective {
         const containers = this.params.containersLocations
             .map(({x, y}) => lookUtils.lookAtConstructionSite(room, x, y))
             .filter(site => !!site);
-        if (containers.length >= 0) {
+        if (containers.length > 0) {
             logger.info(`${containers.length} pending construction sites found`);
             builders.scheduleTask(new BuildConstructionSites({
                 params: {
@@ -108,7 +131,7 @@ class MaintainBuildings extends BaseObjective {
             if (key === 'controller') { return; }
             if (creepActor.type !== AT_CREEP_ACTOR) { return; }
 
-            if (creepActor.hasTaskScheduled(A_BUILD)) { return; }
+            if (creepActor.hasTaskScheduled(A_REPAIR)) { return; }
 
             const structure = damaged[k % damaged.length];
 

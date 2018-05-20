@@ -8,8 +8,7 @@ const {
     CP_HAULER
 } = require('constants');
 const ExpandPopulation = require('objectives.actor.ExpandPopulation');
-const logger = require('log').getLogger('tasks.colony.InitializeColony', 'white');
-// const UpgradeRCL3 = require('objectives.architect.UpgradeRCL3');
+const logger = require('log').getLogger('tasks.colony.PopulationControl', 'white');
 
 /**
  * The PopulationControl objective consists in increasing the creeps cap

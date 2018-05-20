@@ -4,6 +4,7 @@ const SpawnActor = require('agents.SpawnActor');
 const {
     AT_COLONY
 } = require('constants');
+const PopulationControl = require('objectives.colony.PopulationControl');
 
 /**
  * The colony is instanciated on request of the hive mind,
@@ -29,6 +30,14 @@ class Colony extends BaseAgent {
         // many more Architects will be attached to this agent as deemed necessary
         // by the executed tasks. However, only one room exists at the initialization phase.
     }
+
+    run() {
+        super.run();
+        if (!this.currentObjective) {
+            this.setObjective(new PopulationControl());
+        }
+    }
+
 }
 
 module.exports = Colony;

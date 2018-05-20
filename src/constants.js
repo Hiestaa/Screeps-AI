@@ -33,14 +33,13 @@ const CONSTANTS = [
 
     /* Objectives */
     /* * Hive mind */
-    'O_INCREASE_GCL',
-    'O_MAXIMIZE_DEFENSIVE_POWER',
-    'O_MAXIMIZE_OFFENSIVE_POWER',
+    'O_OVERSEE_EMPIRE',
     /* * Colony */
     'O_POPULATION_CONTROL',
     /* * Architect */
     'O_INITIALIZE_ROOM',
     'O_UPGRADE_RCL_2',
+    'O_UPGRADE_RCL_3',
     /* * Manager */
     'O_KEEP_UPGRADING_CONTROLLER',
     'O_DISTRIBUTE_ENERGY',
@@ -51,12 +50,10 @@ const CONSTANTS = [
     'O_MAINTAIN_BUILDINGS',
     /* Tasks */
     /* * Hive mind */
-    'T_GET_FACTION_STARTED',
     'T_RENEW_POPULATION',
     'T_EXPAND_POPULATION',
     'T_EVALUATE_NEARBY_ROOMS',
     /* * Colony */
-    'T_INITIALIZE_COLONY',
     /* * Architect */
     'T_POPULATE_INITIAL_GROUPS',
     'T_POPULATE_GROUPS_FROM_PROFILE',

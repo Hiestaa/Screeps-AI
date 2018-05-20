@@ -108,12 +108,14 @@ class LevelLogger {
     }
 
     _enable(level) {
+        Memory.levelLogger = Memory.levelLogger || {};
         if (!LEVEL_STYLES[level]) { level = 'debug'; }
         this[level] = this._log(level);
         Memory.levelLogger[level] = true;
     }
 
     _disable(level) {
+        Memory.levelLogger = Memory.levelLogger || {};
         if (!LEVEL_STYLES[level]) { level = 'debug'; }
         this[level] = () => {};
         Memory.levelLogger[level] = false;
@@ -133,6 +135,7 @@ let levelLogger = new LevelLogger();
 class Logger {
     constructor(filename, color) {
         this.filename = filename;
+        Memory.loggers = Memory.loggers || {};
         let state = Memory.loggers[filename];
         if (!state) {
             Memory.loggers[filename] = state = {color};

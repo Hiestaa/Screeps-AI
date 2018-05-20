@@ -1,6 +1,9 @@
 // FUNCTIONS RELATED TO THE MANAGEMENT OF AGENT INSTANCES (in module memory)
 
 const logger = require('log').getLogger('agents.AgentsManager.storage', '#FC00FF');
+const {
+    AT_HIVE_MIND
+} = require('constants');
 
 let agents = [];
 const agentsById = {};
@@ -48,6 +51,15 @@ exports.addAgent = (agent) => {
     agentsById[agent.id] = agent;
 };
 
+exports.getHiveMind = () => {
+    let hiveMind = null;
+    Object.keys(agentsById).forEach(id => {
+        if (agentsById[id].type === AT_HIVE_MIND) {
+            hiveMind = agentsById[id];
+        }
+    });
+    return hiveMind;
+};
 
 /**
  * Remove agent reference from the storage.

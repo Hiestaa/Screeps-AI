@@ -18,7 +18,6 @@ const {
     forEachPendingAgents
 } = require('agents.AgentsManager.build');
 const HiveMind = require('agents.HiveMind');
-const GetFactionStarted = require('tasks.hiveMind.GetFactionStarted');
 const agentClasses = require('agents');
 const CreepActor = require('agents.CreepActor');
 const logger = require('log').getLogger('agents.AgentsManager.run', '#FC00FF');
@@ -124,13 +123,6 @@ module.exports = () => {
         // add the agent to the list of managed agents so it can be saved
         // and reloaded at the next tick
         addAgent(hiveMind);
-
-        // schedule the 'GET_FACTION_STARTED' task on the hive-mind
-        // TODO: if we ever want to have another task assigen to the hive mind,
-        // we probably should assign some kind of generic objective that
-        // does nothing but check the conditions for scheduling future hive-mind tasks
-        // same could apply to the colony
-        hiveMind.scheduleTask(new GetFactionStarted());
     }
     // verify that we haven't any pending new agent.
     // if we do, we need to get the agent created and initialized after the load

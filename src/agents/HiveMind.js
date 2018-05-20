@@ -3,6 +3,7 @@ const Colony = require('agents.Colony');
 const {
     AT_HIVE_MIND
 } = require('constants');
+const OverseeEmpire = require('objectives.hiveMind.OverseeEmpire');
 
 /**
  * The hive mind is attached to the no game object in particular, a
@@ -27,6 +28,14 @@ class HiveMind extends BaseAgent {
         // to expand to uncharted territories. These will happen
         // when executing the appropriate tasks.
     }
+
+    run() {
+        super.run();
+        if (!this.currentObjective) {
+            this.setObjective(new OverseeEmpire());
+        }
+    }
+
 }
 
 module.exports = HiveMind;

@@ -8,7 +8,7 @@ const PopulateGroupsFromProfile = require('tasks.architect.PopulateGroupsFromPro
 const KeepUpgradingController = require('objectives.manager.KeepUpgradingController');
 const DistributeEnergy = require('objectives.manager.DistributeEnergy');
 const MaintainBuildings = require('objectives.manager.MaintainBuildings');
-// const UpgradeRCL3 = require('objectives.architect.UpgradeRCL3');
+const UpgradeRCL3 = require('objectives.architect.UpgradeRCL3');
 
 /**
  * The UpgradeRCL2 objective consists in prioritizing the upgrade of the rooom
@@ -59,9 +59,9 @@ class UpgradeRCL2 extends BaseObjective {
         // probably not - they are going to die doing whatever they wanna do, then
         // be replaced by other creeps that will be properly assigned.
 
-        // if (architect.object('room').controller.level >= 2) {
-        //     this.setObjective(new UpgradeRCL3());
-        // }
+        if (architect.object('room').controller.level >= 2) {
+            architect.setObjective(new UpgradeRCL3());
+        }
     }
 }
 

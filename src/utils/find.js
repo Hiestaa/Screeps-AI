@@ -16,3 +16,17 @@ exports.findContainers = (room, {hasEnergy, isDamaged}={}) => {
         }
     });
 };
+
+/**
+ * Utility function to find the extensions in a room.
+ * @param {Room} room - room in which to find the containers
+ * @param {Object} [filters] - criteriae to restrict the result set
+ * @return {Array<StructureExtension>} - array of containers matching all defined criteriae
+ */
+exports.findExtensions = (room) => {
+    return room.find(FIND_STRUCTURES, {
+        filter: (s) => {
+            return s.structureType === STRUCTURE_EXTENSION;
+        }
+    });
+};

@@ -6,6 +6,8 @@ const ControllerManager = require('agents.ControllerManager');
 const BuildingManager = require('agents.BuildingManager');
 const FighterGroup = require('agents.FighterGroup');
 const logger = require('log').getLogger('agents.Architect', '#0E9800');
+const layoutsUtils = require('utils.layouts');
+const InitializeRoom = require('objectives.architect.InitializeRoom');
 
 const {
     AT_ARCHITECT
@@ -79,6 +81,14 @@ class Architect extends BaseAgent {
         state.unassignedCreepActorIds = this.unassignedCreepActorIds;
         state.nbMiningSpots = this.nbMiningSpots;
         state.containerLocations = this.containerLocations;
+        state.extensionLocations = this.extensionLocations;
+    }
+
+    run() {
+        super.run();
+        if (!this.currentObjective) {
+            this.setObjective(new InitializeRoom());
+        }
     }
 
     load(state) {
@@ -87,6 +97,7 @@ class Architect extends BaseAgent {
         this.unassignedCreepActorIds = state.unassignedCreepActorIds;
         this.nbMiningSpots = state.nbMiningSpots;
         this.containerLocations = state.containerLocations;
+        this.extensionLocations = state.extensionLocations;
     }
 
     /**
@@ -164,6 +175,37 @@ class Architect extends BaseAgent {
         }
 
         return this.containerLocations;
+    }
+
+    getExtensionsLocations() {
+        const room = this.object('room');
+        const spawn = this.agent('spawn').object('spawn');
+        const nbAllowedExtensions = CONTROLLER_STRUCTURES['extension'][room.controller.level];
+        if (!this.extensionLocations || this.extensionLocations.length < nbAllowedExtensions) {
+            this.extensionLocations = layoutsUtils.spirale(spawn.pos, nbAllowedExtensions, ({x, y}) => {
+                const dx = Math.abs(spawn.pos.x - x);
+                const dy = Math.abs(spawn.pos.y - y);
+                return dy >= 2 && dx >= 2  // not too close to the spawn
+                    // leave space for diagonal movements
+                    && ((dy % 2 === 0 && dx % 2 === 0) || (dy % 2 === 1 && dx % 2 === 1))
+                    // not structure, resource, or wall terrain
+                    // accept construction sites, as these need to be part of the count
+                    // as they do account for the maximum nb of allowed extensions
+                    && room.lookForAt(LOOK_STRUCTURES, x, y).length === 0
+                    && room.lookForAt(LOOK_RESOURCES, x, y).length === 0
+                    && room.lookForAt(LOOK_TERRAIN).filter(terrain => terrain.type === 'wall').length === 0;
+            });
+            this.extensionLocations.forEach(({x, y}) => {
+                console.log(`Will build extension at: ${x}, ${y}`);
+            });
+        }
+        else {
+            this.extensionLocations.forEach(({x, y}) => {
+                console.log(`Pre-saved build extension at: ${x}, ${y}`);
+            });
+        }
+
+        return this.extensionLocations;
     }
 }
 
