@@ -45,14 +45,6 @@ class ExpandPopulation extends BaseObjective {
         // TODO: make that a feature of the tasks and objective in a generic manner
         if (this.state.nextExec && Game.time < this.state.nextExec) { return; }
         this.state.nextExec = Game.time + 10;
-        // count (and save as this never changes within the objective's lifespan)
-        // the number of creeps that should be spawned for each profile.
-        if (!this.state.nbPerProfile) {
-            this.state.nbPerProfile = {};
-            this.params.profiles.forEach(p => {
-                this.state.nbPerProfile[p] = (this.state.nbPerProfile[p] || 0) + 1;
-            });
-        }
 
         const handlerId = this.params.handlerId;
         // count the number of creeps pending for creation for each profile
@@ -64,11 +56,11 @@ class ExpandPopulation extends BaseObjective {
             }
         });
 
-        Object.keys(this.state.nbPerProfile).forEach(profile => {
+        Object.keys(this.params.profiles).forEach(profile => {
             // number of creeps we still need to create
             // total expected - already created (and not dead yet) - pending creation
             const nbMissing = (
-                this.state.nbPerProfile[profile] -
+                this.params.profiles[profile] -
                 (spawnActor.nbSpawnedByProfile[profile] || 0) -
                 (pendingPerProfile[profile] || 0)
             );

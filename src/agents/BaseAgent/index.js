@@ -399,6 +399,20 @@ class BaseAgent {
     }
 
     /**
+     * Attach the given object to the current agent.
+     * This will make sure the object is attached in a way that the link with
+     * the agent will be properly saved in memory
+     * @param {String} key - key under which to store this agent in `attachedGameObjects`
+                       if the key already exists, it will be overrided
+     * @param {GameObject} object - the object to attach. It should have an id and
+     *                     should be retrieveable via `Game.getObjectById()`.
+     */
+    attachObject(key, object) {
+        this.attachedGameObjects[key] = object;
+        this.attachedGameObjectIds[key] = object.id;
+    }
+
+    /**
      * Retrieve an attached agent
      */
     agent(key) {

@@ -25,6 +25,7 @@ const CONSTANTS = [
     'AT_SPAWN_MANAGER',  // attached to a spawn actor and creep actors
     'AT_SOURCE_MANAGER',  // attached to a source and creep actors
     'AT_BUILDING_MANAGER',  // attached to a list of building structs and creep actors
+    'AT_LOGISTIC_MANAGER',  // attached to a list of creep actors and structures able to contain energy
     'AT_FIGHTER_GROUP',  // attached to creep actors
     'AT_ACTOR',  // not actually used, specify one of the types below
     'AT_CREEP_ACTOR',  // attached to a creep

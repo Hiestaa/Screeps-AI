@@ -6,8 +6,7 @@ const {
 } = require('constants');
 const Fetch = require('tasks.creepActions.Fetch');
 const Harvest = require('tasks.creepActions.Harvest');
-const math = require('utils.math');
-const logger = require('log').getLogger('tasks.creepActions.SuperFetch', 'white');
+const logger = require('log').getLogger('tasks.creepActions.SuperFetch', '#F4C300');
 const findUtils = require('utils.find');
 
 /**
@@ -40,35 +39,17 @@ class SuperFetch extends BaseCreepAction {
      */
     findSource(creepActor) {
         const creep = creepActor.object('creep');
-        const sources = creep.room.find(FIND_SOURCES_ACTIVE);
-        if (sources.length === 0) {
+        const source = creep.room.findClosestByRange(FIND_SOURCES_ACTIVE);
+        if (!source) {
             logger.error(
                 'No energy container or source to harvest from - ' + creep.name +
                 ' is unable to upgrade controller of room: ' + creep.room.name);
             return;
         }
 
-        const {item} = math.min(sources, (source => creep.pos.getRangeTo(source.pos)));
-
         creepActor.scheduleTask(new Harvest({
             priority: this.priority + 1,
-            params: {sourceId: item.id}
-        }));
-        this.hasFinished = true;
-    }
-
-    findDroppedEnergy(creepActor) {
-        const creep = creepActor.object('creep');
-        const resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
-            filter: (resource) => resource.type === RESOURCE_ENERGY
-        });
-        if (!resource) {
-            return this.findSource(creepActor);
-        }
-
-        creepActor.scheduleTask(new Fetch({
-            priority: this.priority + 1,
-            params: {resourceId: resource.id}
+            params: {sourceId: source.id}
         }));
         this.hasFinished = true;
     }
@@ -80,23 +61,40 @@ class SuperFetch extends BaseCreepAction {
      */
     findEnergyContainer(creepActor) {
         const creep = creepActor.object('creep');
-        const containers = findUtils.findContainers(creep.room, {hasEnergy: true});
-        if (containers.length === 0) {
-            this.findDroppedEnergy(creepActor);
+        const container = findUtils.findClosestContainer(creep.pos, {hasEnergy: true});
+        if (!container) {
+            logger.info('No container found - Looking for source to harvest from.');
+            return this.findSource(creepActor);
         }
-        else {
-            const {item} = math.max(containers, (container => container.store[RESOURCE_ENERGY]));
-            // TODO: the tasks don't appear to be executed in this order without the priority hack......
-            creepActor.scheduleTask(new Fetch({
-                priority: this.priority + 1,
-                params: {containerId: item.id}
-            }));
-            this.hasFinished = true;
+        // TODO: the tasks don't appear to be executed in this order without the priority hack......
+        creepActor.scheduleTask(new Fetch({
+            priority: this.priority + 1,
+            params: {containerId: container.id}
+        }));
+        this.hasFinished = true;
+    }
+
+    findDroppedEnergy(creepActor) {
+        const creep = creepActor.object('creep');
+        const resource = findUtils.findClosestDroppedEnergy(creep.pos, {
+            minAmount: creepActor.carryCapacity()
+        });
+
+        if (!resource) {
+            logger.info('No resource found - looking for energy container');
+            return this.findEnergyContainer(creepActor);
         }
+
+        creepActor.scheduleTask(new Fetch({
+            priority: this.priority + 1,
+            params: {resourceId: resource.id}
+        }));
+        this.hasFinished = true;
     }
 
     execute(creepActor) {
-        this.findEnergyContainer(creepActor);
+        logger.debug('Looking for dropped energy.');
+        this.findDroppedEnergy(creepActor);
     }
 
     finished(creepActor) {

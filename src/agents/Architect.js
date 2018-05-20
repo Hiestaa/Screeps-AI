@@ -5,6 +5,7 @@ const SpawnManager = require('agents.SpawnManager');
 const ControllerManager = require('agents.ControllerManager');
 const BuildingManager = require('agents.BuildingManager');
 const FighterGroup = require('agents.FighterGroup');
+const LogisticManager = require('agents.LogisticManager');
 const logger = require('log').getLogger('agents.Architect', '#0E9800');
 const layoutsUtils = require('utils.layouts');
 const InitializeRoom = require('objectives.architect.InitializeRoom');
@@ -67,6 +68,10 @@ class Architect extends BaseAgent {
         const defenseGroup = new FighterGroup();
         defenseGroup.initialize(room, `DefenseGroup R${room.name}`);
         this.attachAgent('defenseGroup', defenseGroup);
+
+        const logisticManager = new LogisticManager();
+        logisticManager.initialize(room);
+        this.attachAgent('logistic', logisticManager);
     }
 
     findGameObject(key, val) {
@@ -206,6 +211,11 @@ class Architect extends BaseAgent {
         }
 
         return this.extensionLocations;
+    }
+
+    getRCL() {
+        const room = this.object('room');
+        return room.controller.level;
     }
 }
 

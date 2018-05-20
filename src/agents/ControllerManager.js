@@ -58,7 +58,7 @@ class ControllerManager extends BaseManager {
      * @return {Integer} - the number of upgrade spots
      */
     getNbUpgradeSpots() {
-        if (this.nbUpgradeSpots !== null) { return this.nbUpgradeSpots; }
+        if (this.nbUpgradeSpots) { return this.nbUpgradeSpots; }
 
         const controller = this.object('controller');
         const upgradeSpots = this.findUpgradeSpots();
@@ -66,6 +66,16 @@ class ControllerManager extends BaseManager {
 
         logger.debug(`${this.name} (controllerId=${controller.id}) has ${this.nbUpgradeSpots} upgrade spots.`);
         return this.nbUpgradeSpots;
+    }
+
+    load(state) {
+        super.load(state);
+        this.nbUpgradeSpots = state.nbUpgradeSpots;
+    }
+
+    save(state) {
+        super.save(state);
+        state.nbUpgradeSpots = this.nbUpgradeSpots;
     }
 }
 

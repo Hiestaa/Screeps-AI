@@ -13,7 +13,6 @@ const {
 class BuildingManager extends BaseManager {
     constructor(id) {
         super(id);
-        this.nbBuildingActors = 0;
     }
 
     /**
@@ -24,12 +23,10 @@ class BuildingManager extends BaseManager {
      * @param {Array} constructionSiteIds - list of ids of construction sites
      *                this building manager should take care of completing and maintaining.
      */
-    initialize(room, creepActorIds=[], constructionSiteIds=[]) {
-        constructionSiteIds = constructionSiteIds || [];
-        const attachedGameObjectIds = {};
-        for (var i = 0; i < constructionSiteIds.length; i++) {
-            attachedGameObjectIds[`constructionSite_${i}`] = constructionSiteIds[i];
-        }
+    initialize(room, creepActorIds=[]) {
+        const attachedGameObjectIds = {
+            room: room.name
+        };
         attachedGameObjectIds['room'] = room.name;
         super.initialize(
             'BuildingManager R' + room.name, AT_BUILDING_MANAGER,
@@ -42,10 +39,6 @@ class BuildingManager extends BaseManager {
         }
         return Game.getObjectById(val);
     }
-
-    load(state) { super.load(state); this.nbBuildingActors = state.nbBuildingActors; }
-
-    save(state) { super.save(state); state.nbBuildingActors = this.nbBuildingActors; }
 }
 
 module.exports = BuildingManager;

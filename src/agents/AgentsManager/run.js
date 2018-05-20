@@ -98,9 +98,17 @@ module.exports = () => {
     // was run on the same node so we gotta reload the whole bunch
     const agents = getExistingAgentIds().map(agentId => {
         const agentState = getAgentState(agentId);
+        if (!agentState || !agentState.type) {
+            logger.warning(`agent id ${agentId} has no type nor state.`);
+            return null;
+        }
+        if (!agentClasses[agentState.type]) {
+            logger.warning(`agentsClasses[${agentState.type}] is not a constructor (agentId=${agentId}))`);
+            return null;
+        }
         const instance = new agentClasses[agentState.type](agentId);
         return instance;
-    });
+    }).filter(a => !!a);
 
     // commit the agents list to storage before we attempt to load their state
     // this is necessary for the agent load function to be able to query
