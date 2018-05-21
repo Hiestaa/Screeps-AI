@@ -8,6 +8,7 @@ const PopulateGroupsFromProfile = require('tasks.architect.PopulateGroupsFromPro
 const KeepUpgradingController = require('objectives.manager.KeepUpgradingController');
 const DistributeEnergy = require('objectives.manager.DistributeEnergy');
 const MaintainBuildings = require('objectives.manager.MaintainBuildings');
+const EnergyFlow = require('objectives.manager.EnergyFlow');
 const UpgradeRCL3 = require('objectives.architect.UpgradeRCL3');
 
 /**
@@ -43,6 +44,8 @@ class UpgradeRCL2 extends BaseObjective {
             controllerManager.setObjective(new KeepUpgradingController());
         }
 
+        // TODO: consolidate setting the MaintainBuildings objective in UpgradeRCL2 and UpgradeRCL3
+        // as well as the EnergyFlow and the DistributeEnergy and KeepUpgradingController.
         const buildingManager = architect.agent('builders');
         if (!buildingManager.hasObjective()) {
             buildingManager.setObjective(new MaintainBuildings({
@@ -53,7 +56,16 @@ class UpgradeRCL2 extends BaseObjective {
             }));
         }
 
-        // TODO: logistic system, that will haul energy to the spawn and to the upgrade container
+        const logisticManager = architect.agent('logistic');
+        if (!logisticManager.hasObjective()) {
+            logisticManager.setObjective(new EnergyFlow({
+                params: {
+                    mineContainersPos: architect.getContainerLocations(),
+                    extensionsPos: architect.getExtensionsLocations(),
+                    controllerContainersPos: []
+                }
+            }));
+        }
 
         // do we need to redefine the roles of existing creeps?
         // probably not - they are going to die doing whatever they wanna do, then
