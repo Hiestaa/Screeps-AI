@@ -152,7 +152,7 @@ class BaseAgent {
         }
 
         this._tasksList = [];
-        memory._tasksList.forEach(task => {
+        (memory._tasksList || []).forEach(task => {
             this._tasksList.push(new tasks[task.type](task));
         });
     }

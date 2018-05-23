@@ -39,7 +39,7 @@ class SuperFetch extends BaseCreepAction {
      */
     findSource(creepActor) {
         const creep = creepActor.object('creep');
-        const source = creep.room.findClosestByRange(FIND_SOURCES_ACTIVE);
+        const source = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
         if (!source) {
             logger.error(
                 'No energy container or source to harvest from - ' + creep.name +
