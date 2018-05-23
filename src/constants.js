@@ -49,6 +49,7 @@ const CONSTANTS = [
     'O_CLEAR_ROOM_THREATS',
     'O_GARRISONS',
     'O_MAINTAIN_BUILDINGS',
+    'O_ENERGY_FLOW',
     /* Tasks */
     /* * Hive mind */
     'T_RENEW_POPULATION',

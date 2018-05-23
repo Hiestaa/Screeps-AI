@@ -5,6 +5,7 @@ const {
 } = require('constants');
 const PopulateGroupsFromProfile = require('tasks.architect.PopulateGroupsFromProfile');
 const MaintainBuildings = require('objectives.manager.MaintainBuildings');
+const EnergyFlow = require('objectives.manager.EnergyFlow');
 // const UpgradeRCL4 = require('objectives.architect.UpgradeRCL4');
 
 class UpgradeRCL3 extends BaseObjective {
@@ -19,13 +20,23 @@ class UpgradeRCL3 extends BaseObjective {
         }
 
         const buildingManager = architect.agent('builders');
-
         if (!buildingManager.currentObjective || buildingManager.currentObjective.params.roomLevel != 3) {
             buildingManager.setObjective(new MaintainBuildings({
                 params: {
                     containersLocations: architect.getContainerLocations(),
                     extensionsLocations: architect.getExtensionsLocations(),
-                    roomLevel: 3
+                    roomLevel: 2
+                }
+            }));
+        }
+
+        const logisticManager = architect.agent('logistic');
+        if (!logisticManager.hasObjective()) {
+            logisticManager.setObjective(new EnergyFlow({
+                params: {
+                    mineContainersPos: architect.getContainerLocations(),
+                    extensionsPos: architect.getExtensionsLocations(),
+                    controllerContainersPos: []
                 }
             }));
         }

@@ -302,6 +302,31 @@ class BaseAgent {
     }
 
     /**
+     * Get the scheduled or currently executing task of the given type
+     * @param {CONST} taskType - specific type of the task to look for
+     * @param {Object} options
+     * @param {Function} filter - a filter function to apply to task instances,
+     *                   this function will ignore any task for which this function returns false.
+     * @return {BaseTask} - Task instance or null if no matching task can be found
+     */
+    getScheduledTask(taskType, {filter}={}) {
+        if (this.currentTask && this.currentTask.type === taskType && (!filter || filter(this.currentTask))) {
+            return this.currentTask;
+        }
+        if (this._tasksList.length > 0) {
+            for (var i = 0; i < this._tasksList.length; i++) {
+                if (this._tasksList[i] &&
+                    this._tasksList[i].type === taskType &&
+                    (!filter || filter(this._tasksList[i]))) {
+                    return this._tasksList[i];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Ask the agent the number of task it currently has scheduled
      * This include the task the agent is currently executing
      * @param {String} taskType - filter the type of task.

@@ -32,6 +32,17 @@ exports.findClosestDroppedEnergy = (pos, {minAmount}={}) => {
     });
 };
 
+exports.findSpawns = (room, {hasEnergy, isFull, needsEnergy}={}) => {
+    return room.find(FIND_MY_STRUCTURES, {
+        filter: (s) => {
+            return s.structureType === STRUCTURE_SPAWN
+                && (!hasEnergy || s.energy > 100)
+                && (!isFull || s.energy === s.energyCapacity)
+                && (!needsEnergy || s.energy < s.energyCapacity);
+        }
+    });
+};
+
 /**
  * Utility function to find the extensions in a room.
  * @param {Room} room - room in which to find the containers

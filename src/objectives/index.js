@@ -10,7 +10,8 @@ const {
     O_MAINTAIN_BUILDINGS,
     O_UPGRADE_RCL_2,
     O_UPGRADE_RCL_3,
-    O_POPULATION_CONTROL
+    O_POPULATION_CONTROL,
+    O_ENERGY_FLOW
 } = require('constants');
 
 module.exports = {
@@ -25,5 +26,6 @@ module.exports = {
     [O_GARRISONS]: require('objectives.manager.Garrisons'),
     [O_MAINTAIN_BUILDINGS]: require('objectives.manager.MaintainBuildings'),
     [O_EXPAND_POPULATION]: require('objectives.actor.ExpandPopulation'),
-    [O_POPULATION_CONTROL]: require('objectives.colony.PopulationControl')
+    [O_POPULATION_CONTROL]: require('objectives.colony.PopulationControl'),
+    [O_ENERGY_FLOW]: require('objectives.manager.EnergyFlow')
 };

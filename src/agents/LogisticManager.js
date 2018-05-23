@@ -72,7 +72,7 @@ class LogisticManager extends BaseManager {
     /**
      * Designate a new energy storage structure to which the managed haulers should
      * carry the energy they fetch from one of the designated sources.
-     * @param {GameObject} deposit - object to which haulers should be able to `transfer` energy
+     * @param {Structure} deposit - object to which haulers should be able to `transfer` energy
      */
     designateDeposit(deposit) {
         const type = (deposit.structureType === STRUCTURE_CONTAINER

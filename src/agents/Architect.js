@@ -149,6 +149,9 @@ class Architect extends BaseAgent {
      * There is a container at each non-wall terrain next to a source,
      * as well as a couple of containers next to the source where haulers can deposit
      * The result of this function is cached and will never be recomputed.
+     * TODO: split up container locations in mining and controller containers, so
+     * we can request mining container location specifically for the energy flow function.
+     * for now there is no such controller container ^_^
      */
     getContainerLocations() {
         if (this.containerLocations) { return this.containerLocations; }
