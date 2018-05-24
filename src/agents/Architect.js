@@ -193,24 +193,24 @@ class Architect extends BaseAgent {
             this.extensionLocations = layoutsUtils.spirale(spawn.pos, nbAllowedExtensions, ({x, y}) => {
                 const dx = Math.abs(spawn.pos.x - x);
                 const dy = Math.abs(spawn.pos.y - y);
-                return dy >= 2 && dx >= 2  // not too close to the spawn
+                return (dy >= 2 || dx >= 2)  // not too close to the spawn
                     // leave space for diagonal movements
                     && ((dy % 2 === 0 && dx % 2 === 0) || (dy % 2 === 1 && dx % 2 === 1))
                     // not structure, resource, or wall terrain
                     // accept construction sites, as these need to be part of the count
                     // as they do account for the maximum nb of allowed extensions
-                    && room.lookForAt(LOOK_STRUCTURES, x, y).length === 0
+                    && room.lookForAt(LOOK_STRUCTURES, x, y).filter(structure => structure.structureType !== STRUCTURE_EXTENSION).length === 0
                     && room.lookForAt(LOOK_RESOURCES, x, y).length === 0
                     && room.lookForAt(LOOK_TERRAIN).filter(terrain => terrain.type === 'wall').length === 0;
             });
-            this.extensionLocations.forEach(({x, y}) => {
-                console.log(`Will build extension at: ${x}, ${y}`);
-            });
+            // this.extensionLocations.forEach(({x, y}) => {
+            //     console.log(`Will build extension at: ${x}, ${y}`);
+            // });
         }
         else {
-            this.extensionLocations.forEach(({x, y}) => {
-                console.log(`Pre-saved build extension at: ${x}, ${y}`);
-            });
+            // this.extensionLocations.forEach(({x, y}) => {
+            //     console.log(`Pre-saved build extension at: ${x}, ${y}`);
+            // });
         }
 
         return this.extensionLocations;

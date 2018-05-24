@@ -47,12 +47,14 @@ exports.findSpawns = (room, {hasEnergy, isFull, needsEnergy}={}) => {
  * Utility function to find the extensions in a room.
  * @param {Room} room - room in which to find the containers
  * @param {Object} [filters] - criteriae to restrict the result set
+ * @param {Boolean} [filters.hasEnergy=false] - return only containers holding energy
  * @return {Array<StructureExtension>} - array of containers matching all defined criteriae
  */
-exports.findExtensions = (room) => {
+exports.findExtensions = (room, {hasEnergy}={}) => {
     return room.find(FIND_STRUCTURES, {
         filter: (s) => {
-            return s.structureType === STRUCTURE_EXTENSION;
+            return s.structureType === STRUCTURE_EXTENSION
+                && (!hasEnergy || s.store[RESOURCE_ENERGY] > 100);
         }
     });
 };

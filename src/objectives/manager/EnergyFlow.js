@@ -43,7 +43,15 @@ class EnergyFlow extends BaseObjective {
 
     getContainerAtPos(room, pos) {
         const structure = lookUtils.lookAtStructure(room, pos.x, pos.y);
-        if (structure.structureType === STRUCTURE_CONTAINER) {
+        if (structure && structure.structureType === STRUCTURE_CONTAINER) {
+            return structure;
+        }
+        return null;
+    }
+
+    getExtensionAtPos(room, pos) {
+        const structure = lookUtils.lookAtStructure(room, pos.x, pos.y);
+        if (structure && structure.structureType === STRUCTURE_EXTENSION) {
             return structure;
         }
         return null;
@@ -61,7 +69,9 @@ class EnergyFlow extends BaseObjective {
             if (!this.state.mineContainersIds[i]) {
                 container = this.getContainerAtPos(
                     room, this.params.mineContainersPos[i]);
-                this.state.mineContainersIds[i] = container.id;
+                if (container) {
+                    this.state.mineContainersIds[i] = container.id;
+                }
             }
             else {
                 container = Game.getObjectById(this.state.mineContainersIds[i]);
@@ -84,15 +94,16 @@ class EnergyFlow extends BaseObjective {
         let extension;
         for (var i = 0; i < this.params.extensionsPos.length; i++) {
             if (!this.state.extensionsIds[i]) {
-                extension = this.getContainerAtPos(
+                extension = this.getExtensionAtPos(
                     room, this.params.extensionsPos[i]);
-                this.state.extensionsIds[i] = extension.id;
+                if (extension) {
+                    this.state.extensionsIds[i] = extension.id;
+                }
             }
             else {
                 extension = Game.getObjectById(this.state.extensionsIds[i]);
             }
-            // FIXME: isn't this a `energy` and `energyCapacity` property?
-            if (extension && _.sum(extension.store) < extension.storeCapacity) {
+            if (extension && extension.energy < extension.energyCapacity) {
                 extensionsNeedEnergy.push(extension);
             }
         }
@@ -112,7 +123,9 @@ class EnergyFlow extends BaseObjective {
             if (!this.state.controllerContainersIds[i]) {
                 container = this.getContainerAtPos(
                     room, this.params.controllerContainersPos[i]);
-                this.state.controllerContainersIds[i] = container.id;
+                if (container) {
+                    this.state.controllerContainersIds[i] = container.id;
+                }
             }
             else {
                 container = Game.getObjectById(this.state.controllerContainersIds[i]);
@@ -177,7 +190,13 @@ class EnergyFlow extends BaseObjective {
         const containersHaveEnergy = this.getContainersWithEnergy(room);
         // TODO: include a look up of tombstone and dropped energy as a primary FETCH source
 
-        if (containersHaveEnergy === 0) {
+        logger.debug(
+            `EnergyFlow: \n\t${containersHaveEnergy.length} containers -> ` +
+            `\n\t\t -> ${spawnsNeedEnergy.length} spawns` +
+            `\n\t\t -> ${extensionsNeedEnergy.length} extensions` +
+            `\n\t\t -> ${containersNeedEnergy.length} containers`);
+
+        if (containersHaveEnergy.length === 0) {
             logger.info(`No mining container storing energy in room ${room.name}`);
             return;
         }
@@ -195,7 +214,7 @@ class EnergyFlow extends BaseObjective {
         }
 
         const nextContainerWithEnergy = () => {
-            const c = containersHaveEnergy[k];
+            const c = containersHaveEnergy[j];
             j = (j + 1) % containersHaveEnergy.length;
             return c;
         };
@@ -225,7 +244,11 @@ class EnergyFlow extends BaseObjective {
             if (!deposit || alreadyScheduledDepositIds.has(deposit.id)) {
                 stillRoamingCreepActors.push(creepActor);
             }
+            else if (!container) {
+                console.log('wtf no container, containersHaveEnergy.length=' + containersHaveEnergy.length + ', j=' + j);
+            }
             else {
+                console.log('container', container);
                 this.scheduleFetchCarryTasks(
                     creepActor, {containerId: container.id}, deposit.id);
             }

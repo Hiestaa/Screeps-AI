@@ -9,6 +9,7 @@ const {
 const profiles = require('creepsProfiles');
 const preInitCreepActor = require('agents.CreepActor.preInit');
 const logger = require('log').getLogger('tasks.actor.Spawn', '#00FF90');
+const findUtils = require('utils.find');
 
 const MAX_UPGRADE_LEVEL = 50;
 const MAX_SPAWN_DELAY = 1000;
@@ -27,11 +28,23 @@ class SpawnTask extends BaseTask {
      * @param {Object} [data.state] - state of the task (used for reloading)
      */
     constructor({priority, state, params: {profile, handlerId, maximize}}) {
-        super(T_SPAWN, AT_SPAWN_ACTOR, {priority, state, params: {profile, handlerId, maximize}});
+        super(T_SPAWN, AT_SPAWN_ACTOR, {
+            priority,
+            state,
+            params: {profile, handlerId, maximize}
+        }, {frequency: 7});
         this.doneSpawning = false;
+        this.extensions = null;
+    }
+
+    findAvailableExtensions(spawnActor) {
+        const spawn = spawnActor.object('spawn');
+        this.extensions = findUtils.findExtensions(spawn.room);
+        return this.extensions;
     }
 
     computeCosts(spawn) {
+        // TODO: account for available extensions
         const {profile, maximize} = this.params;
         logger.info(`[DEBUG] computeCost, maximizing ${maximize}.`);
         let profileInstance = null;
@@ -58,7 +71,11 @@ class SpawnTask extends BaseTask {
             }
         }
 
-        this.state.costs = {base: baseProfileInstance.cost, maximized: profileInstance.cost, maximizedLevel: maxLevel};
+        this.state.costs = {
+            base: baseProfileInstance.cost,
+            maximized: profileInstance.cost,
+            maximizedLevel: maxLevel
+        };
         return profileInstance;
     }
 
@@ -73,7 +90,13 @@ class SpawnTask extends BaseTask {
         logger.info(`Spawning creep ${name} [profile=${profileInstance.name}, ` +
             `${maximize}=${this.state.costs.maximizedLevel}, cost=${profileInstance.cost}]`);
 
-        let code = buildPendingCreepActor(spawnActor, creepActorMemory, profileInstance, handlerId);
+        let code = buildPendingCreepActor(
+            spawnActor,
+            creepActorMemory,
+            profileInstance,
+            handlerId,
+            // use spawn energy after the energy available in the extensions
+            this.extensions.concat([spawnActor.object('spawn')]));
         if (code === OK) {
             spawnActor.profilesSpawned[name] = profile;
             spawnActor.nbSpawnedByProfile[profile] = (
@@ -84,6 +107,21 @@ class SpawnTask extends BaseTask {
             logger.failure(code, `Unable to spawn creep ${name}`);
         }
 
+    }
+
+    // get available energy accounting for all available extensions
+    getAvailableEnergy(spawnActor) {
+        const spawnEnergy = spawnActor.energy();
+        if (!this.state.availableExtensionsIds) {
+            this.extensions = this.findAvailableExtensions(spawnActor);
+            this.state.availableExtensionsIds = this.extensions.map(e => e.id);
+        }
+        else {
+            this.extensions = this.state.availableExtensionsIds.map(
+                id => Game.getObjectById(id));
+        }
+
+        return _.sum(this.extensions.map(e => e.energy)) + spawnEnergy;
     }
 
     /**
@@ -103,13 +141,14 @@ class SpawnTask extends BaseTask {
             profileInstance = this.computeCosts(spawnActor.object('spawn'));
         }
 
-        if (spawnActor.energy() >= this.state.costs.maximized) {
+        const availableEnergy = this.getAvailableEnergy(spawnActor);
+        if (availableEnergy >= this.state.costs.maximized) {
             profileInstance = profileInstance || new profiles[profile]({[maximize]: this.state.costs.maximizedLevel});
             this.doSpawn(spawnActor, profileInstance);
         }
         // if we've waited for a long time for the required energy but it never came,
         // just spawn the base creep
-        else if (spawnActor.energy() >= this.state.costs.base &&
+        else if (availableEnergy >= this.state.costs.base &&
                  Game.time > this.state.scheduleTime + MAX_SPAWN_DELAY) {
             logger.warning(`Unable to spawn maximized creep after ${MAX_SPAWN_DELAY} ticks - falling back on base level.`);
             profileInstance = new profiles[profile]();

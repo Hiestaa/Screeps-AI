@@ -2,10 +2,19 @@ const BaseObjective = require('objectives.BaseObjective');
 const {
     AT_SPAWN_ACTOR,
     O_EXPAND_POPULATION,
-    T_SPAWN
+    T_SPAWN,
+    CP_HARVESTER,
+    CP_WORKER,
+    CP_HAULER
 } = require('constants');
 const SpawnTask = require('tasks.actor.Spawn');
 const logger = require('log').getLogger('objectives.actor.ExpandPopulation', '#006DDC');
+
+const PROFILES_PRIORITY = {
+    [CP_HARVESTER]: 10,
+    [CP_WORKER]: 5,
+    [CP_HAULER]: 2
+};
 
 /**
  * The ExpandPopulation schedules as many tasks as necessary on the spawn actor to
@@ -69,7 +78,8 @@ class ExpandPopulation extends BaseObjective {
                 for (var i = 0; i < nbMissing; i++) {
                     spawnActor.scheduleTask(new SpawnTask({
                         // always maximize efficiency for now. We'll have reason to maximize other areas later.
-                        params: {profile, handlerId: handlerId, maximize: 'efficiency'}
+                        params: {profile, handlerId: handlerId, maximize: 'efficiency'},
+                        priority: PROFILES_PRIORITY[profile] || 1
                     }));
                 }
             }

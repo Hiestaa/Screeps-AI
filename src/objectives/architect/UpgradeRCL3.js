@@ -20,7 +20,7 @@ class UpgradeRCL3 extends BaseObjective {
         }
 
         const buildingManager = architect.agent('builders');
-        if (!buildingManager.currentObjective || buildingManager.currentObjective.params.roomLevel != 3) {
+        if (!buildingManager.currentObjective || buildingManager.currentObjective.params.roomLevel != 2) {
             buildingManager.setObjective(new MaintainBuildings({
                 params: {
                     containersLocations: architect.getContainerLocations(),
