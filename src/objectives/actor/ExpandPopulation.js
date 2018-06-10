@@ -73,13 +73,19 @@ class ExpandPopulation extends BaseObjective {
                 (spawnActor.nbSpawnedByProfile[profile] || 0) -
                 (pendingPerProfile[profile] || 0)
             );
+            // priority depending on the profile
+            // if we still miss all the expected creeps of a profile, increase its priority
+            let priority = PROFILES_PRIORITY[profile] || 1;
+            if (nbMissing === this.params.profiles[profile]) {
+                priority += Math.max.apply(null, Object.keys(PROFILES_PRIORITY).map(k => PROFILES_PRIORITY[k]));
+            }
             if (nbMissing > 0) {
                 logger.debug(`Missing ${nbMissing} creeps profile ${profile}`);
                 for (var i = 0; i < nbMissing; i++) {
                     spawnActor.scheduleTask(new SpawnTask({
                         // always maximize efficiency for now. We'll have reason to maximize other areas later.
                         params: {profile, handlerId: handlerId, maximize: 'efficiency'},
-                        priority: PROFILES_PRIORITY[profile] || 1
+                        priority
                     }));
                 }
             }

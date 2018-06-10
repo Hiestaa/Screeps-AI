@@ -59,7 +59,7 @@ class EnergyFlow extends BaseObjective {
 
     // get the constructed mining containers that have energy
     // cache the ids of the containers found at expected positions for faster calls
-    getContainersWithEnergy(room) {
+    getContainersWithEnergy(room, secondCall) {
         const containersHaveEnergy = [];
         if (!this.state.mineContainersIds) {
             this.state.mineContainersIds = {};
@@ -81,12 +81,21 @@ class EnergyFlow extends BaseObjective {
             }
         }
 
+        // if we haven't found any containers, if might be because our cache is outdated
+        // call again after having cleared out the cache
+        if (containersHaveEnergy.length === 0) {
+            // avoid infinite recursion
+            if (secondCall) { return containersHaveEnergy; }
+            this.state.mineContainersIds = null;
+            return this.getContainersWithEnergy(room, true);
+        }
+
         return containersHaveEnergy;
     }
 
     // get the constructed extensions that need energy
     // cache the ids of the extensions found at expected positions for faster calls
-    getExtentionsForRefill(room) {
+    getExtentionsForRefill(room, secondCall) {
         const extensionsNeedEnergy = [];
         if (!this.state.extensionsIds) {
             this.state.extensionsIds = {};
@@ -108,12 +117,21 @@ class EnergyFlow extends BaseObjective {
             }
         }
 
+        // if we haven't found any extension, if might be because our cache is outdated
+        // call again after having cleared out the cache
+        if (extensionsNeedEnergy.length === 0) {
+            // avoid infinite recursion
+            if (secondCall) { return extensionsNeedEnergy; }
+            this.state.extensionsIds = null;
+            return this.getExtentionsForRefill(room, true);
+        }
+
         return extensionsNeedEnergy;
     }
 
     // get the constructed controller containers that need energy
     // cache the ids of the containers found at expected positions for faster calls
-    getContainersForRefill(room) {
+    getContainersForRefill(room, secondCall) {
         const containersNeedEnergy = [];
         if (!this.state.controllerContainersIds) {
             this.state.controllerContainersIds = {};
@@ -133,6 +151,15 @@ class EnergyFlow extends BaseObjective {
             if (container && _.sum(container.store) < container.storeCapacity) {
                 containersNeedEnergy.push(container);
             }
+        }
+
+        // if we haven't found any container, if might be because our cache is outdated
+        // call again after having cleared out the cache
+        if (containersNeedEnergy.length === 0) {
+            // avoid infinite recursion
+            if (secondCall) { return containersNeedEnergy; }
+            this.state.controllerContainersIds = null;
+            return this.getExtentionsForRefill(room, true);
         }
 
         return containersNeedEnergy;
