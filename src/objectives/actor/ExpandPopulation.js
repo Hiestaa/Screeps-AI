@@ -79,7 +79,9 @@ class ExpandPopulation extends BaseObjective {
             if (nbMissing === this.params.profiles[profile]) {
                 priority += Math.max.apply(null, Object.keys(PROFILES_PRIORITY).map(k => PROFILES_PRIORITY[k]));
             }
-            if (nbMissing > 0) {
+            // only schedule up to one task per profile, so we don't have a long waiting
+            // line of tasks for the same profile which the priority is outdated
+            if (nbMissing > 0 && (pendingPerProfile[profile] || 0) <= 1) {
                 logger.debug(`Missing ${nbMissing} creeps profile ${profile}`);
                 for (var i = 0; i < nbMissing; i++) {
                     spawnActor.scheduleTask(new SpawnTask({

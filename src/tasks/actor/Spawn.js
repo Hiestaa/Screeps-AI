@@ -38,45 +38,72 @@ class SpawnTask extends BaseTask {
     }
 
     findAvailableExtensions(spawnActor) {
+        if (this.extensions) { return this.extensions; }
+
         const spawn = spawnActor.object('spawn');
-        this.extensions = findUtils.findExtensions(spawn.room);
+
+        if (!this.state.availableExtensionsIds) {
+            this.extensions = findUtils.findExtensions(spawn.room);
+            this.state.availableExtensionsIds = this.extensions.map(e => e.id);
+        }
+        else {
+            this.extensions = this.state.availableExtensionsIds.map(
+                id => Game.getObjectById(id));
+        }
         return this.extensions;
     }
 
-    computeCosts(spawn) {
-        // TODO: account for available extensions
+    computeCosts(spawnActor) {
         const {profile, maximize} = this.params;
+        const spawn = spawnActor.object('spawn');
         logger.info(`[DEBUG] computeCost, maximizing ${maximize}.`);
-        let profileInstance = null;
         let baseProfileInstance = new profiles[profile]();
+        let maxProfileInstance = baseProfileInstance;
         if (!maximize) {
-            this.state.costs = {base: profileInstance.cost, maximized: profileInstance.cost, maximizedLevel: 0};
-            return baseProfileInstance;
+            this.state.costs = {
+                base: maxProfileInstance.cost,
+                maximized: maxProfileInstance.cost,
+                maximizedWithExtensions: maxProfileInstance.cost,
+                maximizedLevel: 0,
+                maximizedLevelWithExtensions: 0
+            };
+            return;
         }
 
         let maxLevel = 0;
-        profileInstance = baseProfileInstance;
+        let maxLevelWithExtensions = 0;
+        let maxProfileInstanceWithExtensions = maxProfileInstance;
         logger.info(`[DEBUG] computeCost, base ${profile} cost = ${baseProfileInstance.cost}`);
+        const extensions = findUtils.findAvailableExtensions(spawnActor);
+        const extendedEnergyCapacity = spawn.energyCapacity + extensions.reduce(((ext, acc) => acc + ext.energyCapacity), 0);
 
         for (var i = 0; i < MAX_UPGRADE_LEVEL; i++) {
-            let pi = new profiles[profile]({[maximize]: maxLevel + 1});
-            logger.info(`[DEBUG] computeCost, ${profile} ${maximize} lvl ${maxLevel + 1}, cost = ${pi.cost}`);
+            let pi = new profiles[profile]({[maximize]: maxLevelWithExtensions + 1});
+            logger.info(`[DEBUG] computeCost, ${profile} ${maximize} lvl ${maxLevelWithExtensions + 1}, cost = ${pi.cost}`);
             if (pi.cost <= spawn.energyCapacity) {
                 maxLevel = maxLevel + 1;
-                profileInstance = pi;
+                maxProfileInstance = pi;
+                maxLevelWithExtensions = maxLevel;
+                maxProfileInstanceWithExtensions = maxProfileInstance;
+            }
+            else if (pi.cost <= extendedEnergyCapacity) {
+                maxProfileInstanceWithExtensions = pi;
+                maxLevelWithExtensions = maxLevelWithExtensions + 1;
             }
             else {
-                logger.info(`[DEBUG] computeCost, too expensive for spawn (energyCapacity=${spawn.energyCapacity})`);
+                logger.info(`[DEBUG] computeCost, too expensive for spawn (energyCapacity=${spawn.energyCapacity}, ` +
+                            `extendedEnergyCapacity=${extendedEnergyCapacity})`);
                 break;
             }
         }
 
         this.state.costs = {
             base: baseProfileInstance.cost,
-            maximized: profileInstance.cost,
-            maximizedLevel: maxLevel
+            maximized: maxProfileInstance.cost,
+            maximizedLevel: maxLevel,
+            maximizedWithExtensions: maxProfileInstanceWithExtensions.cost,
+            maximizedLevelWithExtensions: maxLevelWithExtensions
         };
-        return profileInstance;
     }
 
     doSpawn(spawnActor, profileInstance) {
@@ -112,21 +139,14 @@ class SpawnTask extends BaseTask {
     // get available energy accounting for all available extensions
     getAvailableEnergy(spawnActor) {
         const spawnEnergy = spawnActor.energy();
-        if (!this.state.availableExtensionsIds) {
-            this.extensions = this.findAvailableExtensions(spawnActor);
-            this.state.availableExtensionsIds = this.extensions.map(e => e.id);
-        }
-        else {
-            this.extensions = this.state.availableExtensionsIds.map(
-                id => Game.getObjectById(id));
-        }
+        const extensions = this.findAvailableExtensions(spawnActor);
 
-        return _.sum(this.extensions.map(e => e.energy)) + spawnEnergy;
+        return _.sum(extensions.map(e => e.energy)) + spawnEnergy;
     }
 
     /**
      * If the spawn has enough energy, spawn a new creep of the desired profile.
-     * The spawn will try to maximize the toughness of efficiency of the creep if `maximize` is specified.
+     * The spawn will try to maximize the toughness or efficiency of the creep if `maximize` is specified.
      * If it hasn't gathered enough energy to fill its capacity and spawn the highest level capable after
      * MAX_SPAWN_DELAY ticks, it will (try to) spawn a non-upgraded version of the requested profile
      */
@@ -138,23 +158,36 @@ class SpawnTask extends BaseTask {
         let profileInstance = null;
         if (!this.state.costs) {
             // this will define `this.state.costs`
-            profileInstance = this.computeCosts(spawnActor.object('spawn'));
+            this.computeCosts(spawnActor);
         }
 
         const availableEnergy = this.getAvailableEnergy(spawnActor);
-        if (availableEnergy >= this.state.costs.maximized) {
-            profileInstance = profileInstance || new profiles[profile]({[maximize]: this.state.costs.maximizedLevel});
-            this.doSpawn(spawnActor, profileInstance);
+        if (availableEnergy >= this.state.costs.maximizedWithExtensions) {
+            profileInstance = new profiles[profile]({
+                [maximize]: this.state.costs.maximizedLevelWithExtensions
+            });
         }
         // if we've waited for a long time for the required energy but it never came,
         // just spawn the base creep
         else if (availableEnergy >= this.state.costs.base &&
                  Game.time > this.state.scheduleTime + MAX_SPAWN_DELAY) {
-            logger.warning(`Unable to spawn maximized creep after ${MAX_SPAWN_DELAY} ticks - falling back on base level.`);
-            profileInstance = new profiles[profile]();
-            this.doSpawn(spawnActor, profileInstance);
+            let str = 'base level';
+            if (availableEnergy >= this.state.cost.maximized) {
+                str = `maximized leve ${this.state.costs.maximizedLevel}`;
+                profileInstance = new profile[profile]({
+                    [maximize]: this.state.costs.maximizedLevel
+                });
+            }
+            else {
+                profileInstance = new profiles[profile]();
+            }
+            logger.warning(`Unable to spawn maximized creep after ${MAX_SPAWN_DELAY} ticks - falling back on ` +
+                           str);
         }
 
+        if (profileInstance) {
+            this.doSpawn(spawnActor, profileInstance);
+        }
     }
 
     finished() {
