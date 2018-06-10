@@ -51,7 +51,7 @@ exports.findSpawns = (room, {hasEnergy, isFull, needsEnergy}={}) => {
  * @return {Array<StructureExtension>} - array of containers matching all defined criteriae
  */
 exports.findExtensions = (room, {hasEnergy}={}) => {
-    return room.find(FIND_STRUCTURES, {
+    return room.find(FIND_MY_STRUCTURES, {
         filter: (s) => {
             return s.structureType === STRUCTURE_EXTENSION
                 && (!hasEnergy || s.store[RESOURCE_ENERGY] > 100);
